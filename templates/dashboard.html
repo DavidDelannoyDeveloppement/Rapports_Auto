@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapports Automatisés</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        img { width: 100%; max-width: 1000px; margin-bottom: 1rem; }
+        .panel { margin-bottom: 2rem; }
+        select { font-size: 1rem; margin-right: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Visualisation des Rapports</h1>
+
+    <form method="get" action="">
+        <label for="contrat">Contrat :</label>
+        <select id="contrat" onchange="location = '/contrat/' + this.value">
+            <option value="">-- Sélectionner --</option>
+            {% for c in contrats %}
+                <option value="{{ c }}" {% if selected_contrat == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+
+        {% if selected_contrat %}
+            <label for="mois">Mois :</label>
+            <select id="mois" onchange="location = '/contrat/{{ selected_contrat }}/' + this.value">
+                <option value="">-- Sélectionner --</option>
+                {% for m in mois %}
+                    <option value="{{ m }}" {% if selected_mois == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+    </form>
+
+    {% if images %}
+        <h2>Panels - {{ selected_contrat }} / {{ selected_mois }}</h2>
+        {% for img in images %}
+            <div class="panel">
+                <h3>{{ img.title }}</h3>
+                <img src="{{ img.file }}" alt="{{ img.title }}">
+            </div>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

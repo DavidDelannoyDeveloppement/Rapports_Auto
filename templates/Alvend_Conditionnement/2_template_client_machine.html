@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta name="description" content=""> -->
+  <title>Rapport {{ name_client }} - Client Machine</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="./../../../creations/{{ name_client }}_reports/images/FiTT-symbole-seul-CMJN.png">
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="container_client_machine">
+
+        <!-- ##################################################### -->
+        <!-- #######   PAGE ANALYSE CPE MENSUEL Combiné   ######## -->
+        <!-- ##################################################### -->
+        <div class="client_machine_page">
+            <div class="titre">
+                <h1>Résultat CPE Mensuel<br>Électricité et Gaz</h1>
+            </div>
+
+            <div class="chiffres-cles">
+                <h3 class="chiffres">CHIFFRES</h3>
+                <h3 class="cles">CLÉS</h3>
+                <h2 class="pourcentage">{{ performance_contrat_percent }}</h2>
+                
+                <div class="support_engagement">
+                    <p class="eco_surconso">{{ eco_surconso }} pour un engagement <br>non contractuel de</p>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract }} %</h2>
+                </div>
+            </div>
+            
+            
+            <div class="support-conso">
+                <div class="support-conso_colonne-gauche">
+                    <p>Consommation Prédite sans AEE de</p>
+                    <p>Consommation Réelle de</p>
+                    <hr class="hr-conso">
+                    <p>Soit {{ gain_perte }} de</p>
+                </div>
+                
+                <div class="support-conso_colonne-droite">
+                    <p>{{ modele_predictif }} <span class="unite">MWh</span></p>
+                    <p>{{ consommation_reelle_elec }} <span class="unite">MWh</span></p>
+                    <hr class="hr-resultat">
+                    <p>{{ performance_contrat_kwh }} <span class="unite">MWh</span></p>
+                </div>
+            </div>
+                        
+
+            <div class="support-graphique">
+                <h2>Superposition des consommations - {{ periode_client }}</h2>
+                <img class="graphic_image" src="{{ superposition_predictif_reelle }}" alt="superposition_predictif_reelle-picture">
+            </div>
+
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+
+        <!-- ################################################## -->
+        <!-- #######   PAGE ANALYSE CPE ANNEE Combiné   ####### -->
+        <!-- ################################################## -->
+        <div class="client_machine_page">
+            <div class="titre">
+                <h1>Résultat CPE Annuel<br>Électricité et Gaz</h1>
+            </div>
+
+            <div class="chiffres-cles">
+                <h3 class="chiffres">CHIFFRES</h3>
+                <h3 class="cles">CLÉS</h3>
+                <h2 class="pourcentage">{{ performance_contrat_percent_year }} %</h2>
+                
+                <div class="support_engagement">
+                    <p class="eco_surconso">{{ eco_surconso_year }} pour un engagement <br>non contractuel de</p>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract }} %</h2>
+                </div>
+            </div>    
+
+            <div class="support-conso">
+                <div class="support-conso_colonne-gauche">
+                    <p>Consommation Prédite sans AEE de</p>
+                    <p>Consommation Réelle de</p>
+                    <hr class="hr-conso">
+                    <p>Soit {{ gain_perte }} de</p>
+                </div>
+                
+                <div class="support-conso_colonne-droite">
+                    <p>{{ modele_predictif_year }} <span class="unite">MWh</span></p>
+                    <p>{{ consommation_reelle_year }} <span class="unite">MWh</span></p>
+                    <hr class="hr-resultat">
+                    <p>{{ performance_contrat_kwh_year }} <span class="unite">MWh</span></p>
+                </div>
+            </div>
+
+            <div class="support-graphique">
+                <h2>Superposition des consommations - de Janvier 2025 à {{ periode_client }}</h2>
+                <img class="graphic_image" src="{{ superposition_predictif_reelle_year }}" alt="superposition_predictif_reelle-picture">
+            </div>
+
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+            <!-- <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> Mars 2024 - {{ periode_client }}</p> -->
+        </div>       
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 1 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_1">
+            <div class="titre">
+                <h1>Analyse<br>Opérationnelle</h1>
+            </div>
+            <div class="support-graphique">
+                <h2>Températures relevées</h2>
+                <img  src="{{ temperatures }}" alt="temperatures-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>  
+        </div>
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 2 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_2">
+            <div class="support-graphique">
+                <h2>Mode de fonctionnement</h2>
+                <img src="{{ mode_fonctionnement }}" alt="mode_fonctionnement-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Taux de compression des circuits</h2>
+                <img src="{{ taux_compression }}" alt="taux_de_compression-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Surchauffe et sous-refroidissement, Circuit 1</h2>
+                <img src="{{ sante_circuit_1 }}" alt="sante_circuit_1-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Surchauffe et sous-refroidissement, Circuit 2</h2>
+                <img src="{{ sante_circuit_2 }}" alt="sante_circuit_2-picture">
+            </div>          
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 3 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_3">
+            <div class="support-graphique">
+                <h2>Mode de fonctionnement</h2>
+                <img src="{{ mode_fonctionnement }}" alt="mode_fonctionnement-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Puissances des compresseurs</h2>
+                <img src="{{ intensite_compresseurs }}" alt="intensite_compresseurs-picture">
+            </div>
+
+            <div class="support-graphique">
+                <h2>Démarrage et temps de fonctionnement par compresseur</h2>
+                <table class="demarrage_temps_circuit_table">
+                    <thead>
+                        <tr>
+                            <th>Circuit</th>
+                            <th>Temps de fonctionnement total</th>
+                            <th>Nombre de démarrage</th>
+                            <th>Temps de fonctionnement moyen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>{{ Temps_de_fonctionnement_total_0 }} min</td>
+                            <td>{Nombre_de_démarrage_0}</td>
+                            <td>{Ratio_démarrages_par_heure_0} min<img src="{{ valid_ratio_0 }}" alt="valid-picture"></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>{{ Temps_de_fonctionnement_total_1 }} min</td>
+                            <td>{Nombre_de_démarrage_1}</td>
+                            <td>{Ratio_démarrages_par_heure_1} min<img src="{{ valid_ratio_1 }}" alt="valid-picture"></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>{{ Temps_de_fonctionnement_total_2 }} min</td>
+                            <td>{Nombre_de_démarrage_2}</td>
+                            <td>{Ratio_démarrages_par_heure_2} min<img src="{{ valid_ratio_2 }}" alt="valid-picture"></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>{{ Temps_de_fonctionnement_total_3 }} min</td>
+                            <td>{Nombre_de_démarrage_3}</td>
+                            <td>{Ratio_démarrages_par_heure_3} min<img src="{{ valid_ratio_3 }}" alt="valid-picture"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>     
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 4 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_4">
+            <div class="support-graphique">
+                <h2>Mode de fonctionnement</h2>
+                <img src="{{ mode_fonctionnement }}" alt="mode_fonctionnement-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Optimisation Énergetique</h2>
+                <img src="{{ optimisation_energetique }}" alt="optimisation_energetique-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Rendement compresseur des circuits</h2>
+                <img src="{{ rendement_compresseur }}" alt="rendement_compresseur-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 5 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <!-- <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_5">
+            <div class="support_items">
+                <h2 class="h2_items">Mode de fonctionnement des circuits</h2>
+                <img class="graphic_image" src="{{ mode_fonctionnement }}" alt="mode_fonctionnement-picture">
+            </div>
+
+            <div class="support_items">
+                <h2 class="h2_items">Puissances moyennes en fonctionnement du circuit <br>{{ periode_client }}</h2>
+                <div class="support_table_puissance">
+                    <table class="puissances_moyennes_fonctionnement_table">
+                        <tr>
+                            <th></th>
+                            <th>Circuit 1</th>
+                            <th>Circuit 2</th>
+                            <th>Circuit 3</th>
+                            <th>Circuit 4</th>
+                        </tr>
+                        <tr>
+                            <td>Puissance<br>Froid</td>
+                            <td>{{ Puissance_froid_0 }} kW</td>
+                            <td>{{ Puissance_froid_1 }} kW</td>
+                            <td>{{ Puissance_froid_2 }} kW</td>
+                            <td>{{ Puissance_froid_3 }} kW</td>
+                        </tr>
+                        <tr>
+                            <td>Puissance<br>Chaud</td>
+                            <td>{{ Puissance_chaud_0 }} kW</td>
+                            <td>{{ Puissance_chaud_1 }} kW</td>
+                            <td>{{ Puissance_chaud_2 }} kW</td>
+                            <td>{{ Puissance_chaud_3 }} kW</td>
+                        </tr>
+                    </table>
+                    
+                    <table class="puissances_electrique_table">
+                        <tr>
+                            <th>Puissance Électrique Machine</th>
+                        </tr>
+                        <tr>
+                            <td>{{ puissance_electrique_machine }} kW</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="support_h2_lien">
+                <h2 class="h2_lien">Accédez en temps réel à vos données<br></h2>
+                <a href="https://view.preprod.fitt-solutions.fr/d/be2fz0k9ij3swc/alvend-accueil?orgId=4" target="_blank">En cliquant ici !</a>
+            </div>
+            
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div> -->
+
+    </main>
+</body>
+</html>
