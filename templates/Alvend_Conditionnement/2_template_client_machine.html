@@ -19,17 +19,18 @@
         <!-- ##################################################### -->
         <div class="client_machine_page">
             <div class="titre">
-                <h1>Résultat CPE Mensuel<br>Électricité et Gaz</h1>
+                <h1>Résultat CPE Mensuel<br>Électricité</h1>
             </div>
 
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent }}</h2>
+                <h2 class="pourcentage">{{ performance_contrat_percent }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso }} pour un engagement <br>non contractuel de</p>
                     <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract }} %</h2>
+                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract }} %</h2> -->
                 </div>
             </div>
             
@@ -53,7 +54,7 @@
 
             <div class="support-graphique">
                 <h2>Superposition des consommations - {{ periode_client }}</h2>
-                <img class="graphic_image" src="{{ superposition_predictif_reelle }}" alt="superposition_predictif_reelle-picture">
+                <img class="graphic_image" src="{{ images_dir }}/graph_5.png" alt="superposition_predictif_reelle-picture">
             </div>
 
             <hr class="bottom_hr_bleu">
@@ -66,7 +67,7 @@
         <!-- ################################################## -->
         <div class="client_machine_page">
             <div class="titre">
-                <h1>Résultat CPE Annuel<br>Électricité et Gaz</h1>
+                <h1>Résultat CPE Annuel<br>Électricité</h1>
             </div>
 
             <div class="chiffres-cles">
