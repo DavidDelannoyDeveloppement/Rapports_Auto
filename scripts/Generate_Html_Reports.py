@@ -2,8 +2,10 @@ import os
 import json
 import platform
 import locale
+import time
 from jinja2 import Environment, FileSystemLoader
 from display_enrichies import enrichir_valeurs
+from export_dashboards import normalize_slug
 from datetime import datetime
 
 # === Définition du chemin de base ===
@@ -41,7 +43,6 @@ def charger_contrat_data(client_dir, periode):
             try:
                 with open(tmp_valeurs, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                # Vérifie la présence d'au moins une clé "1_", "2_", ou "3_"
                 if any(k.startswith("1_") or k.startswith("2_") or k.startswith("3_") for k in data):
                     contrat_path = tmp_path
                     valeurs_path = tmp_valeurs
@@ -68,12 +69,11 @@ def generate_report(client_dir, periode):
     valeurs, meta = charger_contrat_data(client_dir, periode)
     if not valeurs or not meta:
         print(f"⚠️  Données absentes ou incomplètes pour {client_dir}")
-        return
+        return False
 
     contexte = enrichir_valeurs(valeurs)
     contexte.update(meta)
 
-    # Table d'alias de noms à afficher
     alias_clients = {
         "Alvend_Conditionnement": "Conditionnement",
         "Alvend_Stockage": "Stockage",
@@ -90,7 +90,6 @@ def generate_report(client_dir, periode):
     contexte["name_client"] = client_dir
     contexte["nom_affiche_client"] = alias_clients.get(client_dir, client_dir)
 
-    # Choix de la locale pour afficher les mois en français
     if platform.system() == "Windows":
         locale.setlocale(locale.LC_TIME, 'French_France.1252')
     else:
@@ -98,6 +97,11 @@ def generate_report(client_dir, periode):
 
     mois_str = datetime.strptime(periode, "%Y-%m").strftime("%B %Y").capitalize()
     contexte["periode_client"] = mois_str
+
+    short_periode = periode[2:]
+    dashboard_slug = normalize_slug(meta.get("dashboard", ""))
+    contexte["dashboard_slug"] = dashboard_slug
+    contexte["images_dir"] = f"../../../exports/{client_dir}/{short_periode}/{dashboard_slug}"
 
     templates = ["1_template_presentation.html", "2_template_client_machine.html", "3_template_index.html"]
     rendered_parts = []
@@ -109,10 +113,9 @@ def generate_report(client_dir, periode):
             rendered_parts.append(tpl.render(**contexte))
         except Exception as e:
             print(f"❌ Erreur avec le template {tpl_name} pour {client_dir}: {e}")
-            return
+            return False
 
     final_html = "\n".join(rendered_parts)
-    short_periode = periode[2:]  # '2025-05' -> '25-05'
     dossier_output = os.path.join(HTML_BASE_DIR, client_dir, short_periode)
     os.makedirs(dossier_output, exist_ok=True)
 
@@ -123,18 +126,36 @@ def generate_report(client_dir, periode):
         f.write(final_html)
 
     print(f"✅ Rapport HTML généré : {out_path}")
+    return True
 
 # === Générer tous les rapports d'un mois donné ===
 def generate_all_reports(periode):
     contrats_dir = os.path.join(DATA_DIR)
     print(f"📂 Lecture du répertoire contrats : {contrats_dir}")
 
+    start_time = time.time()
+    total = 0
+    erreurs = []
+
     for contrat_id in os.listdir(contrats_dir):
         chemin_complet = os.path.join(contrats_dir, contrat_id)
         if os.path.isdir(chemin_complet):
-            generate_report(contrat_id, periode)
+            success = generate_report(contrat_id, periode)
+            total += 1
+            if not success:
+                erreurs.append(contrat_id)
         else:
             print(f"⏭️  Ignoré (pas un dossier): {contrat_id}")
+
+    duree = time.time() - start_time
+    print("\n📊 RÉCAPITULATIF")
+    print("===========================")
+    print(f"🕒 Durée totale d'exécution : {round(duree, 2)} secondes")
+    print(f"📁 Total de contrats traités : {total}")
+    print(f"✅ Rapports réussis : {total - len(erreurs)}")
+    print(f"❌ Échecs : {len(erreurs)}")
+    if erreurs:
+        print("🔎 Contrats en erreur :", ", ".join(erreurs))
 
 # === Lancement direct depuis le terminal ===
 if __name__ == "__main__":

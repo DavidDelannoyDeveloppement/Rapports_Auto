@@ -2,6 +2,7 @@ import os
 import json
 import re
 import unicodedata
+import time
 from datetime import datetime, timedelta
 import pandas as pd
 from dotenv import load_dotenv
@@ -66,7 +67,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
         url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_str}&to={to_str}"
         print(f"➡️ Chargement du dashboard : {url}")
         page.goto(url)
-        page.wait_for_timeout(45000)  # Allongé à 45s
+        page.wait_for_timeout(45000)
 
         current_url = page.url
         expected_slug = normalize_slug(slug)
@@ -107,13 +108,13 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
             elif ptype == "stat":
                 raw = panel.text_content().strip()
-                match = re.search(r"(.*?)([\-]?\d+[.,]?\d*\s?(?:kWh|MWh|%|€|kW)?)", raw)
+                match = re.search(r"(.*?)([\-]?\d+[.,]?\d*)\s?(?:kWh|MWh|%|€|kW)?", raw)
                 if match:
                     label = match.group(1).strip() or f"valeur_{pid}"
                     val = match.group(2).strip()
                     key = f"{pid}_{label.replace(' ', '_')}"
                     values[key] = val
-                    print(f"   🔢 Valeur extraite : {key} = {val}")
+                    print(f"   🔢 Valeur extraite (sans unité) : {key} = {val}")
                 else:
                     print(f"   ❌ Aucune valeur détectée dans panel #{pid}")
 
@@ -135,16 +136,21 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 # === TRAITEMENT MULTI-CONTRATS ===
 def main():
     print("\n🚀 Lancement de l'export automatique multi-contrats...")
+    start = time.time()
+
     mois_precedent = get_previous_month_range()
-    periode_reference = mois_precedent[1].strftime("%Y-%m")
+    periode_reference_full = mois_precedent[1].strftime("%Y-%m")
+    periode_reference_short = mois_precedent[1].strftime("%y-%m")
     date_fin_mois_precedent = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
 
     groups = df.groupby(["Contrat", "UID Dashboard", "Nom du Dashboard"])
 
+    total = 0
+    erreurs = []
+
     for (contrat, uid, slug), group in groups:
         panel_ids = group["ID Panel à extraire"].tolist()
         panel_types = group["Nature du panel"].tolist()
-
         date_debut = group["Date Début"].iloc[0]
 
         if isinstance(date_debut, str) and "enregistré" in date_debut.lower():
@@ -154,7 +160,23 @@ def main():
             from_str = pd.to_datetime(date_debut).strftime("%Y-%m-%dT00:00:00Z")
             to_str = date_fin_mois_precedent
 
-        export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_str, periode_reference)
+        try:
+            export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_str, periode_reference_short)
+            total += 1
+        except Exception as e:
+            erreurs.append(f"{contrat} / {slug}")
+            print(f"❌ Erreur export pour {contrat} / {slug} : {e}")
+
+    duree_sec = round(time.time() - start, 2)
+    minutes = int(duree_sec // 60)
+    secondes = int(duree_sec % 60)
+    print("\n📊 RÉCAPITULATIF EXPORT")
+    print("===========================")
+    print(f"🕒 Durée totale d'exécution : {minutes} min {secondes} sec")
+    print(f"📁 Contrats exportés : {total}")
+    print(f"❌ Échecs détectés : {len(erreurs)}")
+    if erreurs:
+        print("🔎 Contrats en erreur :", ", ".join(erreurs))
 
 # === LANCEMENT ===
 if __name__ == "__main__":

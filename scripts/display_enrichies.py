@@ -1,36 +1,52 @@
 def enrichir_valeurs(valeurs):
     enrichies = {}
 
-    # 1. Copier toutes les valeurs brutes dans le contexte
+    # Copier toutes les valeurs brutes dans le contexte
     for key, val in valeurs.items():
         enrichies[key] = val
 
-    # 2. Calcul dynamique de performance (mensuel, annuel, gaz, elec...)
-    def eval_conformite(perf_key, engag_key, color_key, eco_key, gain_key):
-        try:
-            perf = float(valeurs.get(perf_key, 0))
-            engag = float(valeurs.get(engag_key, 0))
-            delta = perf - engag
-            enrichies[color_key] = "#00b050" if delta >= 0 else "#c00000"
-            enrichies[eco_key] = "Économie" if delta >= 0 else "Surconsommation"
-            enrichies[gain_key] = "un gain" if delta >= 0 else "une perte"
-        except:
-            enrichies[color_key] = "#000000"
-            enrichies[eco_key] = ""
-            enrichies[gain_key] = ""
+    # Calcul de la différence prédiction - consommation (en valeur absolue)
+    try:
+        prediction = float(valeurs.get("2_Prédiction_d'électricité", 0))
+        consommation = float(valeurs.get("1_Consommation_d'électricité", 0))
+        diff = abs(round(prediction - consommation, 2))
+        enrichies["performance_contrat_kwh"] = f"{diff:.2f}"
+    except Exception:
+        enrichies["performance_contrat_kwh"] = "N/A"
 
-    # 3. Appliquer la logique à différents cas
-    eval_conformite("performance_contrat_percent", "engagement_contract", "conforme_color", "eco_surconso", "gain_perte")
-    eval_conformite("performance_contrat_percent_year", "engagement_contract", "conforme_color_year", "eco_surconso_year", "gain_perte_year")
-    eval_conformite("performance_contrat_percent_elec", "engagement_contract_elec", "conforme_color_elec", "eco_surconso_elec", "gain_perte_elec")
-    eval_conformite("performance_contrat_percent_year_elec", "engagement_contract_elec", "conforme_color_year_elec", "eco_surconso_year_elec", "gain_perte_year_elec")
-    eval_conformite("performance_contrat_percent_gaz", "engagement_contract_gaz", "conforme_color_gaz", "eco_surconso_gaz", "gain_perte_gaz")
-    eval_conformite("performance_contrat_percent_year_gaz", "engagement_contract_gaz", "conforme_color_year_gaz", "eco_surconso_year_gaz", "gain_perte_year_gaz")
+    # Texte gain/perte
+    try:
+        prediction = float(valeurs.get("2_Prédiction_d'électricité", 0))
+        consommation = float(valeurs.get("1_Consommation_d'électricité", 0))
+        diff = round(prediction - consommation, 2)
+        enrichies["gain_perte"] = "un Gain" if diff >= 0 else "une Perte"
+    except Exception:
+        enrichies["gain_perte"] = "Erreur"
 
-    # 4. Alias explicites pour correspondance HTML <-> valeurs.json
+    # Couleur performance élec vs engagement
+    try:
+        perf = float(valeurs.get("3_Economie_d'électricité", 0))
+        engag = float(valeurs.get("4_Engagement_Contractuel_Élec", 0))
+        delta = perf - engag
+        enrichies["engagement_color"] = "#00b050" if delta >= 0 else "#c00000"
+    except Exception:
+        enrichies["engagement_color"] = "#000000"
+
+    # Texte surconso/éco
+    try:
+        perf = float(valeurs.get("3_Economie_d'électricité", 0))
+        engag = float(valeurs.get("4_Engagement_Contractuel_Élec", 0))
+        delta = perf - engag
+        enrichies["eco_surconso"] = "Économie" if delta >= 0 else "Surconsommation"
+    except:
+        enrichies["eco_surconso"] = "#Erreur"
+
+    # Alias explicites pour correspondance HTML <-> valeurs.json
     alias_map = {
-        "1_Consommation_d'électricité":"consommation_reelle_elec",
+        "1_Consommation_d'électricité": "consommation_reelle_elec",
+        "2_Prédiction_d'électricité": "modele_predictif",
         "3_Economie_d'électricité": "performance_contrat_percent",
+        "4_Engagement_Contractuel_Élec": "engagement_contract",
         "4_Eco_Elec": "performance_contrat_percent_elec",
         "9_Eco_Elec": "performance_contrat_percent_year_elec",
         "14_Eco_Gaz": "performance_contrat_percent_year_gaz",
@@ -48,7 +64,7 @@ def enrichir_valeurs(valeurs):
         if original in valeurs:
             enrichies[alias] = valeurs[original]
 
-    # 5. Alias pour certaines images si présentes dans les valeurs
+    # Alias pour certaines images si présentes dans les valeurs
     image_aliases = [
         "superposition_predictif_reelle",
         "superposition_predictif_reelle_year",
