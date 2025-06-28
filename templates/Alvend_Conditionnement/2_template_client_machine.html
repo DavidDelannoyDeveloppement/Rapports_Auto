@@ -25,16 +25,17 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent }} %</h2>
+                <h2 class="pourcentage">{{ performance_contrat_percent_elec }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract }} %</h2>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec }} %</h2>
                     <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract }} %</h2> -->
                 </div>
             </div>
             
-            
+            <div class="ajustement"></div>
+
             <div class="support-conso">
                 <div class="support-conso_colonne-gauche">
                     <p>Consommation Prédite sans AEE de</p>
@@ -44,17 +45,19 @@
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif }} <span class="unite">MWh</span></p>
+                    <p>{{ modele_predictif_elec }} <span class="unite">MWh</span></p>
                     <p>{{ consommation_reelle_elec }} <span class="unite">MWh</span></p>
                     <hr class="hr-resultat">
                     <p>{{ performance_contrat_kwh }} <span class="unite">MWh</span></p>
                 </div>
             </div>
-                        
+                     
+            <div class="ajustement"></div>
+            
 
             <div class="support-graphique">
                 <h2>Superposition des consommations - {{ periode_client }}</h2>
-                <img class="graphic_image" src="{{ images_dir }}/graph_5.png" alt="superposition_predictif_reelle-picture">
+                <img class="graphic_image" src="{{ superposition_predictif_reelle }}" alt="superposition_predictif_reelle-picture">
             </div>
 
             <hr class="bottom_hr_bleu">
@@ -73,29 +76,37 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_year }} %</h2>
+                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso_year }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract }} %</h2>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_year }} %</h2>
+                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract }} %</h2> -->
                 </div>
             </div>    
+
+            <div class="ajustement"></div>
+
 
             <div class="support-conso">
                 <div class="support-conso_colonne-gauche">
                     <p>Consommation Prédite sans AEE de</p>
                     <p>Consommation Réelle de</p>
                     <hr class="hr-conso">
-                    <p>Soit {{ gain_perte }} de</p>
+                    <p>Soit {{ gain_perte_year }} de</p>
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif_year }} <span class="unite">MWh</span></p>
-                    <p>{{ consommation_reelle_year }} <span class="unite">MWh</span></p>
+                    <p>{{ modele_predictif_elec_year }} <span class="unite">MWh</span></p>
+                    <p>{{ consommation_reelle_elec_year }} <span class="unite">MWh</span></p>
                     <hr class="hr-resultat">
                     <p>{{ performance_contrat_kwh_year }} <span class="unite">MWh</span></p>
                 </div>
             </div>
+
+
+            <div class="ajustement"></div>
+
 
             <div class="support-graphique">
                 <h2>Superposition des consommations - de Janvier 2025 à {{ periode_client }}</h2>
