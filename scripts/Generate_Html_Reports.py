@@ -1,3 +1,7 @@
+print()
+print('⚙️ Lancement génération des Html')
+print()
+
 import os
 import json
 import platform
@@ -19,22 +23,19 @@ env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
 # === Charger les données JSON (valeurs + meta) pour un contrat ===
 def charger_contrat_data(client_dir, periode):
-    short_periode = periode[2:]  # Convertit '2025-05' en '25-05'
+    short_periode = periode[2:]
     periode_dir = os.path.join(DATA_DIR, client_dir, short_periode)
 
     if not os.path.isdir(periode_dir):
         print(f"❌ Période non trouvée : {periode_dir}")
-        return None, None
+        return []
 
     sous_dossiers = [d for d in os.listdir(periode_dir) if os.path.isdir(os.path.join(periode_dir, d))]
     if not sous_dossiers:
-        print(f"❌ Aucun sous-dossier de contrat trouvé dans : {periode_dir}")
-        return None, None
+        print(f"❌ Aucun sous-dossier trouvé dans : {periode_dir}")
+        return []
 
-    contrat_path = None
-    valeurs_path = None
-    meta_path = None
-
+    triplets = []
     for dossier in sous_dossiers:
         tmp_path = os.path.join(periode_dir, dossier)
         tmp_valeurs = os.path.join(tmp_path, "valeurs.json")
@@ -42,36 +43,48 @@ def charger_contrat_data(client_dir, periode):
         if os.path.exists(tmp_valeurs) and os.path.exists(tmp_meta):
             try:
                 with open(tmp_valeurs, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if any(k.startswith("1_") or k.startswith("2_") or k.startswith("3_") for k in data):
-                    contrat_path = tmp_path
-                    valeurs_path = tmp_valeurs
-                    meta_path = tmp_meta
-                    break
+                    valeurs = json.load(f)
+                with open(tmp_meta, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                if any(k.startswith("1_") or k.startswith("2_") or k.startswith("3_") for k in valeurs):
+                    triplets.append((valeurs, meta, tmp_meta))
             except Exception as e:
                 print(f"⛔ Erreur lecture JSON dans {tmp_valeurs} : {e}")
 
-    if not contrat_path:
-        print(f"❌ Aucun sous-dossier avec fichiers JSON complets et pertinents dans : {periode_dir}")
-        return None, None
-
-    with open(valeurs_path, "r", encoding="utf-8") as f:
-        valeurs = json.load(f)
-
-    with open(meta_path, "r", encoding="utf-8") as f:
-        meta = json.load(f)
-
-    return valeurs, meta
+    if not triplets:
+        print(f"❌ Aucun sous-dossier avec fichiers JSON complets dans : {periode_dir}")
+    return triplets
 
 # === Générer le rapport HTML pour un contrat donné ===
 def generate_report(client_dir, periode):
+    print("")
     print(f"\n🔧 Génération du rapport pour {client_dir} ({periode})")
-    valeurs, meta = charger_contrat_data(client_dir, periode)
-    if not valeurs or not meta:
-        print(f"⚠️  Données absentes ou incomplètes pour {client_dir}")
+    short_periode = periode[2:]
+    triplets = charger_contrat_data(client_dir, periode)
+    if not triplets:
+        print(f"⚠️ Données absentes ou incomplètes pour {client_dir}")
         return False
 
-    contexte = enrichir_valeurs(valeurs)
+    # 1. Enrichissement
+    t0 = time.time()
+    contexte = {}
+    for valeurs, meta, meta_path in triplets:
+        dashboard_name = meta.get("dashboard", "default")
+        print(f"DEBUG dashboard name: {dashboard_name}")
+
+        partial_ctx = enrichir_valeurs(valeurs, meta_path, client_dir, short_periode)
+
+        # Ajout contrôlé des clés sans écrasement des précédentes
+        for k, v in partial_ctx.items():
+            if k not in contexte:
+                contexte[k] = v
+            else:
+                if "year" in k.lower():
+                    contexte[k] = v
+
+        # print(f"DEBUG clés enrichies : {list(partial_ctx.keys())}")
+
+    print(f"⏱️ enrichir_valeurs : {round(time.time() - t0, 2)}s")
     contexte.update(meta)
 
     alias_clients = {
@@ -98,7 +111,6 @@ def generate_report(client_dir, periode):
     mois_str = datetime.strptime(periode, "%Y-%m").strftime("%B %Y").capitalize()
     contexte["periode_client"] = mois_str
 
-    short_periode = periode[2:]
     dashboard_slug = normalize_slug(meta.get("dashboard", ""))
     contexte["dashboard_slug"] = dashboard_slug
     contexte["images_dir"] = f"../../../exports/{client_dir}/{short_periode}/{dashboard_slug}"
@@ -108,9 +120,11 @@ def generate_report(client_dir, periode):
 
     for tpl_name in templates:
         try:
+            start_tpl = time.time()
             tpl_path = f"{client_dir}/{tpl_name}"
             tpl = env.get_template(tpl_path)
             rendered_parts.append(tpl.render(**contexte))
+            print(f"⏱️ Rendu {tpl_name} : {round(time.time() - start_tpl, 2)}s")
         except Exception as e:
             print(f"❌ Erreur avec le template {tpl_name} pour {client_dir}: {e}")
             return False
@@ -125,12 +139,15 @@ def generate_report(client_dir, periode):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(final_html)
 
+    print(contexte.keys())
     print(f"✅ Rapport HTML généré : {out_path}")
+    print("")
     return True
 
 # === Générer tous les rapports d'un mois donné ===
 def generate_all_reports(periode):
     contrats_dir = os.path.join(DATA_DIR)
+    print("")
     print(f"📂 Lecture du répertoire contrats : {contrats_dir}")
 
     start_time = time.time()
@@ -145,9 +162,10 @@ def generate_all_reports(periode):
             if not success:
                 erreurs.append(contrat_id)
         else:
-            print(f"⏭️  Ignoré (pas un dossier): {contrat_id}")
+            print(f"⏭️ Ignoré (pas un dossier): {contrat_id}")
 
     duree = time.time() - start_time
+    print("")
     print("\n📊 RÉCAPITULATIF")
     print("===========================")
     print(f"🕒 Durée totale d'exécution : {round(duree, 2)} secondes")

@@ -1,90 +1,48 @@
-def enrichir_valeurs(valeurs):
+import os
+import json
+from export_dashboards import normalize_slug
+from alias_resolver import image_aliases, resolve_alias_map
+from display import performance_kwh, gain_perte, engagement_color, eco_surconso, performance_kwh_year, gain_perte_year, engagement_color_year, eco_surconso_year
+
+def enrichir_valeurs(valeurs, meta_path=None, client_dir="unknown_client", periode="00-00"):
     enrichies = {}
 
-    # Copier toutes les valeurs brutes dans le contexte
-    for key, val in valeurs.items():
-        enrichies[key] = val
+    dashboard_slug = "default"
+    dashboard_dir = "dashboard"
+    dashboard_name = "unknown"
 
-    # Calcul de la différence prédiction - consommation (en valeur absolue)
-    try:
-        prediction = float(valeurs.get("2_Prédiction_d'électricité", 0))
-        consommation = float(valeurs.get("1_Consommation_d'électricité", 0))
-        diff = abs(round(prediction - consommation, 2))
-        enrichies["performance_contrat_kwh"] = f"{diff:.2f}"
-    except Exception:
-        enrichies["performance_contrat_kwh"] = "N/A"
+    if meta_path and os.path.exists(meta_path):
+        try:
+            with open(meta_path, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+                dashboard_name = meta.get("dashboard", "")
+                dashboard_slug = normalize_slug(dashboard_name)
+                dashboard_dir = meta.get("dashboard_dir", dashboard_slug)
+        except:
+            pass
 
-    # Texte gain/perte
-    try:
-        prediction = float(valeurs.get("2_Prédiction_d'électricité", 0))
-        consommation = float(valeurs.get("1_Consommation_d'électricité", 0))
-        diff = round(prediction - consommation, 2)
-        enrichies["gain_perte"] = "un Gain" if diff >= 0 else "une Perte"
-    except Exception:
-        enrichies["gain_perte"] = "Erreur"
+    # Génère le préfixe du chemin commun
+    base_image_path = f"../../../exports/{client_dir}/{periode}/{dashboard_dir}"
 
-    # Couleur performance élec vs engagement
-    try:
-        perf = float(valeurs.get("3_Economie_d'électricité", 0))
-        engag = float(valeurs.get("4_Engagement_Contractuel_Élec", 0))
-        delta = perf - engag
-        enrichies["engagement_color"] = "#00b050" if delta >= 0 else "#c00000"
-    except Exception:
-        enrichies["engagement_color"] = "#000000"
+    # Images avec chemins complets
+    for alias, filename in image_aliases.items():
+        enrichies[alias] = f"{base_image_path}/{filename}"
 
-    # Texte surconso/éco
-    try:
-        perf = float(valeurs.get("3_Economie_d'électricité", 0))
-        engag = float(valeurs.get("4_Engagement_Contractuel_Élec", 0))
-        delta = perf - engag
-        enrichies["eco_surconso"] = "Économie" if delta >= 0 else "Surconsommation"
-    except:
-        enrichies["eco_surconso"] = "#Erreur"
-
-    # Alias explicites pour correspondance HTML <-> valeurs.json
-    alias_map = {
-        "1_Consommation_d'électricité": "consommation_reelle_elec",
-        "2_Prédiction_d'électricité": "modele_predictif",
-        "3_Economie_d'électricité": "performance_contrat_percent",
-        "4_Engagement_Contractuel_Élec": "engagement_contract",
-        "4_Eco_Elec": "performance_contrat_percent_elec",
-        "9_Eco_Elec": "performance_contrat_percent_year_elec",
-        "14_Eco_Gaz": "performance_contrat_percent_year_gaz",
-        "2_Conso_Elec_+_Gaz": "conso_mixte",
-        "3_Conso_Prédite_Elec_+_Gaz": "conso_mixte_predite",
-        "4_Eco_Elec_+_Gaz": "eco_mixte",
-        "7_Conso_Élec": "conso_elec",
-        "8_Conso_Prédite_Élec": "conso_elec_predite",
-        "9_Eco_Elec": "eco_elec",
-        "12_Conso_Gaz": "conso_gaz",
-        "13_Conso_Prédite_Gaz": "conso_gaz_predite",
-        "14_Eco_Gaz": "eco_gaz"
-    }
+    # Données brutes via alias dynamiques
+    alias_map = resolve_alias_map(dashboard_name)
     for original, alias in alias_map.items():
         if original in valeurs:
             enrichies[alias] = valeurs[original]
 
-    # Alias pour certaines images si présentes dans les valeurs
-    image_aliases = [
-        "superposition_predictif_reelle",
-        "superposition_predictif_reelle_year",
-        "superposition_predictif_reelle_elec",
-        "superposition_predictif_reelle_year_elec",
-        "superposition_predictif_reelle_gaz",
-        "superposition_predictif_reelle_year_gaz",
-        "temperatures_process",
-        "temperatures_opt",
-        "mode_fonctionnement",
-        "taux_de_compression",
-        "delta_temperatures",
-        "COP",
-        "EER",
-        "taux_recup_chaleur",
-        "puissances_recup_chaleur"
-    ]
+    # Comparaisons dynamiques
+        enrichies["performance_contrat_kwh"] = performance_kwh(valeurs)
+        enrichies["gain_perte"] = gain_perte(valeurs)
+        enrichies["engagement_color"] = engagement_color(valeurs)
+        enrichies["eco_surconso"] = eco_surconso(valeurs)
 
-    for alias in image_aliases:
-        if alias in valeurs:
-            enrichies[alias] = valeurs[alias]
+        enrichies["performance_contrat_kwh_year"] = performance_kwh_year(valeurs)
+        enrichies["gain_perte_year"] = gain_perte_year(valeurs)
+        enrichies["engagement_color_year"] = engagement_color_year(valeurs)
+        enrichies["eco_surconso_year"] = eco_surconso_year(valeurs)
 
     return enrichies

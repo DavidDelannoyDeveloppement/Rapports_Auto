@@ -102,9 +102,24 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
                     }
                 """)
                 path = os.path.join(export_dir, f"graph_{pid}.png")
-                panel.screenshot(path=path)
-                images.append(f"graph_{pid}.png")
-                print(f"   📸 Graphique capturé : graph_{pid}.png")
+
+                box = panel.bounding_box()
+                if box:
+                    panel.screenshot(
+                        path=path,
+                        clip={
+                            "x": box["x"]+1,
+                            "y": box["y"]+1,
+                            "width": box["width"]-1,
+                            "height": box["height"] - 26  # ⬅️ on rogne le bas
+                        }
+                    )
+                    images.append(f"graph_{pid}.png")
+                    print(f"   📸 Graphique capturé : graph_{pid}.png (marge basse supprimée)")
+                else:
+                    print(f"❌ Impossible de récupérer les dimensions du panel {pid}")
+
+
 
             elif ptype == "stat":
                 raw = panel.text_content().strip()
