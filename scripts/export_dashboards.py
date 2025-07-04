@@ -50,7 +50,8 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={"width": 1920, "height": 4000})
+        context = browser.new_context(
+            viewport={"width": 1920, "height": 4000},)
         page = context.new_page()
 
         print("🔐 Connexion à Grafana...")
@@ -102,24 +103,16 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
                     }
                 """)
                 path = os.path.join(export_dir, f"graph_{pid}.png")
-
-                box = panel.bounding_box()
-                if box:
-                    panel.screenshot(
-                        path=path,
-                        clip={
-                            "x": box["x"]+1,
-                            "y": box["y"]+1,
-                            "width": box["width"]-1,
-                            "height": box["height"] - 26  # ⬅️ on rogne le bas
-                        }
-                    )
-                    images.append(f"graph_{pid}.png")
-                    print(f"   📸 Graphique capturé : graph_{pid}.png (marge basse supprimée)")
+                handle = panel.element_handle()
+                if handle:
+                    try:
+                        handle.screenshot(path=path)
+                        images.append(f"graph_{pid}.png")
+                        print(f"   📸 Graphique capturé : graph_{pid}.png")
+                    except Exception as e:
+                        print(f"❌ Erreur capture panel #{pid} : {e}")
                 else:
-                    print(f"❌ Impossible de récupérer les dimensions du panel {pid}")
-
-
+                    print(f"❌ Panel #{pid} introuvable via element_handle()")
 
             elif ptype == "stat":
                 raw = panel.text_content().strip()
@@ -132,6 +125,37 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
                     print(f"   🔢 Valeur extraite (sans unité) : {key} = {val}")
                 else:
                     print(f"   ❌ Aucune valeur détectée dans panel #{pid}")
+
+            elif ptype == "table":
+                handle = panel.element_handle()
+                if handle:
+                    # Nouveau sélecteur Playwright compatible "table Grafana"
+                    rows = panel.locator('div[role="row"]')
+                    nb_rows = rows.count()
+
+                    colonnes = [
+                        "Circuit",
+                        "Temps de fonctionnement total",
+                        "Nombre de démarrage",
+                        "Temps moyen de fonctionnement"
+                    ]
+
+                    table_data = []
+                    for i in range(nb_rows):
+                        cellules = rows.nth(i).locator('div[role="cell"]')
+                        cell_count = cellules.count()
+                        valeurs = [cellules.nth(j).inner_text().strip() for j in range(cell_count)]
+                        if len(valeurs) == len(colonnes):
+                            ligne = dict(zip(colonnes, valeurs))
+                            table_data.append(ligne)
+                        else:
+                            print(f"   ⚠️ Ligne {i+1} ignorée (colonnes inattendues : {cell_count})")
+
+                    key = f"{pid}_table_panel"
+                    values[key] = table_data
+                    print(f"   📋 Table extraite : {len(table_data)} lignes")
+                else:
+                    print(f"❌ Panel table #{pid} introuvable via element_handle()")
 
         with open(os.path.join(export_dir, "valeurs.json"), "w", encoding="utf-8") as f:
             json.dump(values, f, indent=2, ensure_ascii=False)
@@ -154,7 +178,6 @@ def main():
     start = time.time()
 
     mois_precedent = get_previous_month_range()
-    periode_reference_full = mois_precedent[1].strftime("%Y-%m")
     periode_reference_short = mois_precedent[1].strftime("%y-%m")
     date_fin_mois_precedent = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
 
@@ -188,10 +211,10 @@ def main():
     print("\n📊 RÉCAPITULATIF EXPORT")
     print("===========================")
     print(f"🕒 Durée totale d'exécution : {minutes} min {secondes} sec")
-    print(f"📁 Contrats exportés : {total}")
+    print(f"📁 Dashboards exportés : {total}")
     print(f"❌ Échecs détectés : {len(erreurs)}")
     if erreurs:
-        print("🔎 Contrats en erreur :", ", ".join(erreurs))
+        print("🔎 Dashboards en erreur :", ", ".join(erreurs))
 
 # === LANCEMENT ===
 if __name__ == "__main__":

@@ -57,7 +57,7 @@ def performance_kwh(valeurs):
             "Préd_Élec",
             "Préd_Gaz"
         ])
-        return f"{abs(round(prediction - consommation, 2)):.2f}"
+        return f"{abs(prediction - consommation)}"
     except Exception:
         return "N/A"
     
@@ -78,7 +78,7 @@ def performance_kwh_year(valeurs):
             "Préd_Élec",
             "Préd_Gaz"
         ])
-        return f"{abs(round(prediction - consommation, 2)):.2f}"
+        return f"{abs(prediction - consommation)}"
     except Exception:
         return "N/A"
 
@@ -171,7 +171,7 @@ def eco_surconso(valeurs):
             "4_Engagement_Contractuel_Gaz",
             "4_Engagement_Contractuel_Elec+Gaz"
         ])
-        return "Économie" if perf - engag >= 0 else "Surconsommation"
+        return "d'Économie" if perf - engag >= 0 else "de Surconsommation"
     except Exception:
         return "#Erreur"
     
@@ -188,6 +188,6 @@ def eco_surconso_year(valeurs):
             "4_Engagement_Contractuel_Gaz",
             "4_Engagement_Contractuel_Elec+Gaz"
         ])
-        return "Économie" if perf - engag >= 0 else "Surconsommation"
+        return "d'Économie" if perf - engag >= 0 else "de Surconsommation"
     except Exception:
         return "#Erreur"
