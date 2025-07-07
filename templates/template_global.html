@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Rapport {{ client_dir }}</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+  {% include client_dir + '/1_template_presentation.html' %}
+  {% include client_dir + '/2_template_client_machine.html' %}
+  {% include client_dir + '/3_template_index.html' %}
+  
+</body>
+</html>
