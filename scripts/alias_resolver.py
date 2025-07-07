@@ -1,15 +1,36 @@
 # alias_resolver.py
 
+image_aliases = {
+    "Alvend_Conditionnement": "Conditionnement",
+    "Alvend_Stockage": "Stockage",
+    "ITM_Doullens": "ITM Doullens",
+    "ITM_Gouvieux": "ITM Gouvieux",
+    "ITM_Lambersart": "ITM Lambersart",
+    "ITM_Le_Quesnoy": "ITM Le Quesnoy",
+    "ITM_Montigny": "ITM Montigny",
+    "ITM_PAM": "ITM Pont-à-Marcq",
+    "Quercy_Cholet2": "Quercy Cholet2",
+    "Quercy_Guilmot_Gaudais": "Quercy Guilmot Gaudais",
+    
+}
+
 alias_groups = {
     "mensuel": {
         "valeurs": {
             "1_Consommation_d'électricité": "consommation_reelle_elec",
+            "2_Conso_Elec_+_Gaz": "consommation_reelle",
             "2_Prédiction_d'électricité": "modele_predictif_elec",
+            "3_Conso_Prédite_Elec_+_Gaz": "modele_predictif",
             "3_Economie_d'électricité": "performance_contrat_percent_elec",
+            "4_Eco_Elec_+_Gaz": "performance_contrat_percent",
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec",
+            "5_Engagement_Contractuel_Élec_+_Gaz":"engagement_contract",
         },
         "images": {
-            "superposition_predictif_reelle": "graph_5.png",
+            "superposition_predictif_reelle_alvend": "graph_5.png",
+            "superposition_predictif_reelle_itm": "graph_6.png",
+            "superposition_predictif_reelle_elec_itm": "graph_12.png",
+            "superposition_predictif_reelle_gaz_itm": "graph_18.png",
         }
     },
     "annuel": {
@@ -20,7 +41,10 @@ alias_groups = {
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec_year",
         },
         "images": {
-            "superposition_predictif_reelle_year": "graph_5.png",
+            "superposition_predictif_reelle_year_alvend": "graph_5.png",
+            "superposition_predictif_reelle_year_itm": "graph_6.png",
+            "superposition_predictif_reelle_elec_year_itm": "graph_12.png",
+            "superposition_predictif_reelle_gaz_year_itm": "graph_18.png",
         }
     },
     "analyse": {

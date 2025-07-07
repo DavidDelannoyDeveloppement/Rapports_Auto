@@ -35,7 +35,7 @@
 
 
 def chercher_valeur(valeurs, possibles):
-    """Retourne la première valeur trouvée parmi une liste de clés possibles."""
+
     for key in possibles:
         if key in valeurs:
             return float(valeurs[key])
@@ -47,6 +47,7 @@ def performance_kwh(valeurs):
             "1_Consommation_d'électricité",
             "1_Consommation_de_gaz",
             "1_Conso Elec + Gaz",
+            "2_Conso_Elec_+_Gaz",
             "Cons_Élec",
             "Conso_Gaz"
         ])
@@ -54,6 +55,7 @@ def performance_kwh(valeurs):
             "2_Prédiction_d'électricité",
             "2_Prédiction_de_gaz",
             "2_Prédiction Elec + Gaz",
+            "3_Conso_Prédite_Elec_+_Gaz",
             "Préd_Élec",
             "Préd_Gaz"
         ])
@@ -89,6 +91,7 @@ def gain_perte(valeurs):
             "1_Consommation_d'électricité",
             "1_Consommation_de_gaz",
             "1_Conso Elec + Gaz",
+            "2_Conso_Elec_+_Gaz",
             "Cons_Élec",
             "Conso_Gaz"
         ])
@@ -96,6 +99,7 @@ def gain_perte(valeurs):
             "2_Prédiction_d'électricité",
             "2_Prédiction_de_gaz",
             "2_Prédiction Elec + Gaz",
+            "3_Conso_Prédite_Elec_+_Gaz",
             "Préd_Élec",
             "Préd_Gaz"
         ])
@@ -130,12 +134,14 @@ def engagement_color(valeurs):
         perf = chercher_valeur(valeurs, [
             "3_Economie_d'électricité",
             "3_Economie_de_gaz",
-            "3_Economie Elec + Gaz"
+            "3_Economie Elec + Gaz",
+            "4_Eco_Elec_+_Gaz"
         ])
         engag = chercher_valeur(valeurs, [
             "4_Engagement_Contractuel_Élec",
             "4_Engagement_Contractuel_Gaz",
-            "4_Engagement_Contractuel_Elec+Gaz"
+            "4_Engagement_Contractuel_Elec+Gaz",
+            "5_Engagement_Contractuel_Élec_+_Gaz"
         ])
         return "#00b050" if perf - engag >= 0 else "#c00000"
     except Exception:
@@ -164,14 +170,16 @@ def eco_surconso(valeurs):
         perf = chercher_valeur(valeurs, [
             "3_Economie_d'électricité",
             "3_Economie_de_gaz",
-            "3_Economie Elec + Gaz"
+            "3_Economie Elec + Gaz",
+            "4_Eco_Elec_+_Gaz"
         ])
-        engag = chercher_valeur(valeurs, [
-            "4_Engagement_Contractuel_Élec",
-            "4_Engagement_Contractuel_Gaz",
-            "4_Engagement_Contractuel_Elec+Gaz"
-        ])
-        return "d'Économie" if perf - engag >= 0 else "de Surconsommation"
+        # engag = chercher_valeur(valeurs, [
+        #     "4_Engagement_Contractuel_Élec",
+        #     "4_Engagement_Contractuel_Gaz",
+        #     "4_Engagement_Contractuel_Elec+Gaz",
+        #     "5_Engagement_Contractuel_Élec_+_Gaz"
+        # ])
+        return "d'Économie" if perf >= 0 else "de Surconsommation"
     except Exception:
         return "#Erreur"
     
@@ -183,11 +191,11 @@ def eco_surconso_year(valeurs):
             "3_Economie_de_gaz",
             "3_Economie Elec + Gaz"
         ])
-        engag = chercher_valeur(valeurs, [
-            "4_Engagement_Contractuel_Élec",
-            "4_Engagement_Contractuel_Gaz",
-            "4_Engagement_Contractuel_Elec+Gaz"
-        ])
-        return "d'Économie" if perf - engag >= 0 else "de Surconsommation"
+        # engag = chercher_valeur(valeurs, [
+        #     "4_Engagement_Contractuel_Élec",
+        #     "4_Engagement_Contractuel_Gaz",
+        #     "4_Engagement_Contractuel_Elec+Gaz"
+        # ])
+        return "d'Économie" if perf >= 0 else "de Surconsommation"
     except Exception:
         return "#Erreur"

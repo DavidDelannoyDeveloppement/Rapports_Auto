@@ -8,14 +8,11 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 from display_enrichies import enrichir_valeurs
 from export_dashboards import normalize_slug
+from alias_resolver import image_aliases
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 from PyPDF2 import PdfReader, PdfWriter
 
-print()
-heure_actuelle = datetime.now().strftime("%H:%M:%S")
-print(f'⚙️ Lancement génération des Html à {heure_actuelle}')
-print()
 
 # === Définition des chemins de base ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,12 +20,14 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "..", "app", "templates")
 HTML_BASE_DIR = os.path.join(BASE_DIR, "..", "html")
 PDF_BASE_DIR = os.path.join(BASE_DIR, "..", "pdf")
 DATA_DIR = os.path.join(BASE_DIR, "..", "exports")
-CONFIG_PDF_PATH = os.path.join(BASE_DIR, "..", "config_pdf.xlsx")
+CONFIG_PDF_PATH = os.path.join(BASE_DIR, "..", "data", "config_pdf.xlsx")
+
 
 # === Analyse des arguments de ligne de commande ===
 parser = argparse.ArgumentParser(description="Génère les rapports HTML (et optionnellement les PDF)")
 parser.add_argument("--pdf", action="store_true", help="Générer également les PDF")
 parser.add_argument("--periode", type=str, default="2025-06", help="Période à traiter (AAAA-MM)")
+parser.add_argument("--contrat", action="append", help="Contrat(s) à traiter (répétable)", default=[])
 args = parser.parse_args()
 
 GENERER_PDF = args.pdf
@@ -40,7 +39,6 @@ config_df = pd.read_excel(CONFIG_PDF_PATH)
 # === Initialisation de l'environnement Jinja2 ===
 env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
-# === Filtres Jinja2 personnalisés ===
 def format_virgule(valeur):
     try:
         return str(valeur).replace('.', ',')
@@ -57,7 +55,7 @@ def format_virgule_1(valeur):
 env.filters['virgule'] = format_virgule
 env.filters['virgule1'] = format_virgule_1
 
-# === Fonction PDF via Playwright ===
+
 def html_to_pdf_with_playwright(html_path, pdf_output_path):
     try:
         with sync_playwright() as p:
@@ -67,42 +65,75 @@ def html_to_pdf_with_playwright(html_path, pdf_output_path):
             page.goto(url)
             page.pdf(path=pdf_output_path, format="A4", print_background=True)
             browser.close()
-            print(f"📄 PDF généré (Playwright) : {pdf_output_path}")
+            return True
     except Exception as e:
         print(f"❌ Erreur PDF Playwright : {e}")
+        return False
 
-# === Découpe de PDF selon config ===
+
 def decouper_pdf(source_path, output_path, pages_str):
     try:
         reader = PdfReader(source_path)
         writer = PdfWriter()
         pages = []
+
         for part in pages_str.split(','):
+            part = part.strip()
             if '-' in part:
-                start, end = map(int, part.split('-'))
-                pages.extend(range(start - 1, end))
+                start, end = [int(x.strip()) for x in part.split('-')]
+                pages.extend(range(start - 1, end))  # end inclus
             else:
                 pages.append(int(part) - 1)
+
+        # Nettoyage et tri
+        pages = sorted(set(pages))
+
+        print(f"📄 Nombre total de pages dans le PDF complet : {len(reader.pages)}")
+        print(f"📑 Pages demandées : {[p+1 for p in pages]}")
+
         for i in pages:
             if 0 <= i < len(reader.pages):
                 writer.add_page(reader.pages[i])
+            else:
+                print(f"\033[91m⚠️ Page {i+1} ignorée (le PDF n'en contient que {len(reader.pages)})\033[0m")
+
         with open(output_path, "wb") as f:
             writer.write(f)
-        print(f"📄 PDF partiel généré : {output_path}")
+
+        return True
+
     except Exception as e:
         print(f"❌ Erreur découpe PDF : {e}")
+        return False
 
-# === Charger les données JSON (valeurs + meta) ===
+
 def charger_contrat_data(client_dir, periode):
     short_periode = periode[2:]
     periode_dir = os.path.join(DATA_DIR, client_dir, short_periode)
+
     if not os.path.isdir(periode_dir):
         print(f"❌ Période non trouvée : {periode_dir}")
         return []
+
+    # Liste les sous-dossiers
     sous_dossiers = [d for d in os.listdir(periode_dir) if os.path.isdir(os.path.join(periode_dir, d))]
     if not sous_dossiers:
         print(f"❌ Aucun sous-dossier trouvé dans : {periode_dir}")
         return []
+
+    # 🧠 Trie les dossiers en priorité : mensuel < annuel < reste
+    def priorite_dashboard(nom):
+        nom_lower = nom.lower()
+        if "mensuel" in nom_lower:
+            return 1
+        elif "annuel" in nom_lower:
+            return 2
+        else:
+            return 3
+
+    sous_dossiers = sorted(sous_dossiers, key=priorite_dashboard)
+
+    # Chargement des triplets (valeurs, meta, chemin_meta, dossier)
     triplets = []
     for dossier in sous_dossiers:
         tmp_path = os.path.join(periode_dir, dossier)
@@ -117,11 +148,10 @@ def charger_contrat_data(client_dir, periode):
                 triplets.append((valeurs, meta, tmp_meta, dossier))
             except Exception as e:
                 print(f"⛔ Erreur lecture JSON dans {tmp_valeurs} : {e}")
-    if not triplets:
-        print(f"❌ Aucun sous-dossier avec fichiers JSON complets dans : {periode_dir}")
+
     return triplets
 
-# === Générer le rapport HTML et PDF pour un contrat donné ===
+
 def generate_report(client_dir, periode):
     print(f"\n🔧 Génération du rapport pour {client_dir} ({periode})")
     short_periode = periode[2:]
@@ -136,13 +166,19 @@ def generate_report(client_dir, periode):
         dashboard_slug = normalize_slug(meta.get("dashboard", dossier))
         alias_slug = dashboard_slug
         valeurs_multi[alias_slug] = {"valeurs": valeurs, "meta": meta, "meta_path": meta_path}
+
         partial_ctx = enrichir_valeurs(valeurs, meta_path, client_dir, short_periode)
+
         for k, v in partial_ctx.items():
-            if k not in contexte or "year" in k.lower():
+            if k not in contexte:
+                contexte[k] = v
+            elif "year" in k.lower() and "annuel" in dashboard_slug:
                 contexte[k] = v
 
     contexte["valeurs_multi"] = valeurs_multi
+    contexte["client_dir"] = client_dir
     contexte["name_client"] = client_dir
+    contexte["nom_affiche_client"] = image_aliases.get(client_dir, client_dir)
 
     if platform.system() == "Windows":
         locale.setlocale(locale.LC_TIME, 'French_France.1252')
@@ -152,18 +188,14 @@ def generate_report(client_dir, periode):
     mois_str = datetime.strptime(periode, "%Y-%m").strftime("%B %Y").capitalize()
     contexte["periode_client"] = mois_str
 
-    templates = ["1_template_presentation.html", "2_template_client_machine.html", "3_template_index.html"]
-    rendered_parts = []
-    for tpl_name in templates:
-        try:
-            tpl_path = f"{client_dir}/{tpl_name}"
-            tpl = env.get_template(tpl_path)
-            rendered_parts.append(tpl.render(**contexte))
-        except Exception as e:
-            print(f"❌ Erreur avec le template {tpl_name} pour {client_dir}: {e}")
-            return False
+    # Utilisation du template global unique
+    try:
+        tpl = env.get_template("template_global.html")
+        final_html = tpl.render(**contexte)
+    except Exception as e:
+        print(f"❌ Erreur avec le template global pour {client_dir}: {e}")
+        return False
 
-    final_html = "\n".join(rendered_parts)
     dossier_output = os.path.join(HTML_BASE_DIR, client_dir, short_periode)
     os.makedirs(dossier_output, exist_ok=True)
     out_name = f"{client_dir}_{short_periode}.html".replace(" ", "_").replace("-", "_")
@@ -172,40 +204,73 @@ def generate_report(client_dir, periode):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(final_html)
 
-    print(f"✅ Rapport HTML généré : {out_path}\n")
+    print(f"✅ HTML : {out_path}")
 
     if not GENERER_PDF:
+        print(f"📄 PDF (non généré - option désactivée)")
         return True
 
-    # === Génération du PDF complet ===
     dossier_pdf = os.path.join(PDF_BASE_DIR, client_dir, short_periode)
     os.makedirs(dossier_pdf, exist_ok=True)
 
-    row = config_df[(config_df['Contrat'] == client_dir) & (config_df['Période'] == periode)]
+    config_df['Contrat'] = config_df['Contrat'].astype(str).str.strip()
+    config_df['Période'] = config_df['Période'].astype(str).str.strip()
+
+    contrat_nettoye = client_dir.strip().lower()
+    periode_nettoyee = periode.strip()
+
+    row = config_df[
+        (config_df['Contrat'].str.lower() == contrat_nettoye) &
+        (config_df['Période'] == periode_nettoyee)
+    ]
+
     if row.empty:
-        print(f"⚠️ Aucun paramétrage PDF trouvé pour {client_dir} ({periode})")
+        row = config_df[
+            (config_df['Contrat'].str.lower() == contrat_nettoye) &
+            (config_df['Période'].str.upper() == "YYYY-MM")
+        ]
+
+    if row.empty:
+        print(f"⚠️ PDF : aucun paramétrage trouvé dans config_pdf.xlsx pour {client_dir} / {periode}")
         return True
 
-    nom_pdf_complet = row.iloc[0]['Nom_PDF_Complet'].replace('"Contrat"', client_dir).replace('"Période"', short_periode)
-    nom_pdf_partiel = row.iloc[0]['Nom_PDF_Partiel'].replace('"Contrat"', client_dir).replace('"Période"', short_periode)
+    periode_pdf = short_periode.replace("-", "")
+
+    nom_pdf_complet = f"{client_dir}-{periode_pdf}-FiTT"
+    nom_pdf_partiel = f"{client_dir}-{periode_pdf}"
     pages_partiel = row.iloc[0]['Pages_Partiel']
 
     path_pdf_complet = os.path.join(dossier_pdf, nom_pdf_complet + ".pdf")
     path_pdf_partiel = os.path.join(dossier_pdf, nom_pdf_partiel + ".pdf")
 
-    html_to_pdf_with_playwright(out_path, path_pdf_complet)
-    decouper_pdf(path_pdf_complet, path_pdf_partiel, pages_partiel)
+    statut_pdf = "❌"
+    statut_partiel = "❌"
+
+    if html_to_pdf_with_playwright(out_path, path_pdf_complet):
+        statut_pdf = "✅"
+        if decouper_pdf(path_pdf_complet, path_pdf_partiel, pages_partiel):
+            statut_partiel = "✅"
+        else:
+            statut_partiel = "⚠️"
+    else:
+        statut_pdf = "❌"
+
+    print("📄 Récapitulatif :")
+    print(f"   PDF Complet  {statut_pdf}  {nom_pdf_complet}.pdf")
+    print(f"   PDF Partiel  {statut_partiel}  {nom_pdf_partiel}.pdf")
 
     return True
 
-# === Générer tous les rapports pour une période donnée ===
+
+
 def generate_all_reports(periode):
     contrats_dir = os.path.join(DATA_DIR)
     print(f"\n📂 Lecture du répertoire contrats : {contrats_dir}")
     start_time = time.time()
     total = 0
     erreurs = []
-    for contrat_id in os.listdir(contrats_dir):
+    contrats = args.contrat if args.contrat else os.listdir(contrats_dir)
+    for contrat_id in contrats:
         chemin_complet = os.path.join(contrats_dir, contrat_id)
         if os.path.isdir(chemin_complet):
             success = generate_report(contrat_id, periode)
@@ -215,8 +280,8 @@ def generate_all_reports(periode):
         else:
             print(f"⏭️ Ignoré (pas un dossier): {contrat_id}")
     duree = time.time() - start_time
-    print("\n\n📊 RÉCAPITULATIF")
-    print("===========================")
+    print("\n\n📊 RÉCAPITULATIF GLOBAL")
+    print("==========================")
     print(f"🕒 Durée totale d'exécution : {round(duree, 2)} secondes")
     print(f"📁 Total de contrats traités : {total}")
     print(f"✅ Rapports réussis : {total - len(erreurs)}")
@@ -224,5 +289,5 @@ def generate_all_reports(periode):
     if erreurs:
         print("🔎 Contrats en erreur :", ", ".join(erreurs))
 
-# === Lancement ===
+
 generate_all_reports(periode_reference)

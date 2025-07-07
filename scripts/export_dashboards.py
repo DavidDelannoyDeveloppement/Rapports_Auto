@@ -3,6 +3,7 @@ import json
 import re
 import unicodedata
 import time
+import argparse
 from datetime import datetime, timedelta
 import pandas as pd
 from dotenv import load_dotenv
@@ -22,6 +23,12 @@ grafana_base = "https://view.preprod.fitt-solutions.fr"
 excel_path = os.path.join(project_root, "data", "Contrats_FiTT.xlsx")
 df = pd.read_excel(excel_path)
 df.ffill(inplace=True)
+
+# === ARGUMENTS EN LIGNE DE COMMANDE ===
+parser = argparse.ArgumentParser()
+parser.add_argument("--periode", type=str, help="Période à traiter au format AAAA-MM")
+parser.add_argument("--contrat", action="append", default=[], help="Contrats à traiter")
+args = parser.parse_args()
 
 # === DÉTECTION PÉRIODE RÉFÉRENCE ===
 def get_previous_month_range():
@@ -51,7 +58,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
-            viewport={"width": 1920, "height": 4000},)
+            viewport={"width": 1920, "height": 3000},)
         page = context.new_page()
 
         print("🔐 Connexion à Grafana...")
@@ -68,7 +75,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
         url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_str}&to={to_str}"
         print(f"➡️ Chargement du dashboard : {url}")
         page.goto(url)
-        page.wait_for_timeout(45000)
+        page.wait_for_timeout(60000)
 
         current_url = page.url
         expected_slug = normalize_slug(slug)
