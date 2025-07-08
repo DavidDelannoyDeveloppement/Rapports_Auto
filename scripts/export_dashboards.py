@@ -3,7 +3,6 @@ import json
 import re
 import unicodedata
 import time
-import argparse
 from datetime import datetime, timedelta
 import pandas as pd
 from dotenv import load_dotenv
@@ -24,14 +23,11 @@ excel_path = os.path.join(project_root, "data", "Contrats_FiTT.xlsx")
 df = pd.read_excel(excel_path)
 df.ffill(inplace=True)
 
-# === ARGUMENTS EN LIGNE DE COMMANDE ===
-parser = argparse.ArgumentParser()
-parser.add_argument("--periode", type=str, help="Période à traiter au format AAAA-MM")
-parser.add_argument("--contrat", action="append", default=[], help="Contrats à traiter")
-args = parser.parse_args()
-
 # === DÉTECTION PÉRIODE RÉFÉRENCE ===
 def get_previous_month_range():
+    return periode_manuelle if 'periode_manuelle' in globals() else _get_default_previous_month_range()
+
+def _get_default_previous_month_range():
     today = datetime.today().replace(day=1)
     last_month = today - timedelta(days=1)
     start = last_month.replace(day=1)
@@ -57,8 +53,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            viewport={"width": 1920, "height": 3000},)
+        context = browser.new_context(viewport={"width": 1920, "height": 4000})
         page = context.new_page()
 
         print("🔐 Connexion à Grafana...")
@@ -72,10 +67,14 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
         page.goto("about:blank")
         page.wait_for_timeout(1000)
 
-        url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_str}&to={to_str}"
+        # Conversion en timestamp Unix (millisecondes)
+        from_epoch = int(pd.to_datetime(from_str).timestamp() * 1000)
+        to_epoch = int(pd.to_datetime(to_str).timestamp() * 1000)
+
+        url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_epoch}&to={to_epoch}"
         print(f"➡️ Chargement du dashboard : {url}")
         page.goto(url)
-        page.wait_for_timeout(60000)
+        page.wait_for_timeout(20000)
 
         current_url = page.url
         expected_slug = normalize_slug(slug)
@@ -136,17 +135,14 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
             elif ptype == "table":
                 handle = panel.element_handle()
                 if handle:
-                    # Nouveau sélecteur Playwright compatible "table Grafana"
                     rows = panel.locator('div[role="row"]')
                     nb_rows = rows.count()
-
                     colonnes = [
                         "Circuit",
                         "Temps de fonctionnement total",
                         "Nombre de démarrage",
                         "Temps moyen de fonctionnement"
                     ]
-
                     table_data = []
                     for i in range(nb_rows):
                         cellules = rows.nth(i).locator('div[role="cell"]')
@@ -188,12 +184,15 @@ def main():
     periode_reference_short = mois_precedent[1].strftime("%y-%m")
     date_fin_mois_precedent = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
 
-    groups = df.groupby(["Contrat", "UID Dashboard", "Nom du Dashboard"])
+    groupes = df.groupby(["Contrat", "UID Dashboard", "Nom du Dashboard"])
 
     total = 0
     erreurs = []
 
-    for (contrat, uid, slug), group in groups:
+    for (contrat, uid, slug), group in groupes:
+        if contrats_specifiques and contrat not in contrats_specifiques:
+            continue
+
         panel_ids = group["ID Panel à extraire"].tolist()
         panel_types = group["Nature du panel"].tolist()
         date_debut = group["Date Début"].iloc[0]
@@ -202,8 +201,13 @@ def main():
             from_str = mois_precedent[0].strftime("%Y-%m-%dT00:00:00Z")
             to_str = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
         else:
-            from_str = pd.to_datetime(date_debut).strftime("%Y-%m-%dT00:00:00Z")
-            to_str = date_fin_mois_precedent
+            try:
+                from_dt = pd.to_datetime(date_debut)
+                from_str = from_dt.strftime("%Y-%m-%dT00:00:00Z")
+                to_str = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
+            except:
+                from_str = mois_precedent[0].strftime("%Y-%m-%dT00:00:00Z")
+                to_str = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
 
         try:
             export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_str, periode_reference_short)
@@ -223,6 +227,27 @@ def main():
     if erreurs:
         print("🔎 Dashboards en erreur :", ", ".join(erreurs))
 
-# === LANCEMENT ===
+# === LANCEMENT + ARGUMENTS ===
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--periode", help="Période au format AAAA-MM", default=None)
+    parser.add_argument("--contrat", action="append", help="Nom du contrat à traiter (répétable)")
+    args = parser.parse_args()
+
+    if args.periode:
+        try:
+            mois = datetime.strptime(args.periode, "%Y-%m")
+            start = mois.replace(day=1)
+            end = (mois.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+            periode_manuelle = (start, end)
+        except ValueError:
+            print("❌ Format de période invalide. Format attendu : AAAA-MM")
+            exit(1)
+    else:
+        periode_manuelle = _get_default_previous_month_range()
+
+    contrats_specifiques = args.contrat if args.contrat else []
+
     main()
