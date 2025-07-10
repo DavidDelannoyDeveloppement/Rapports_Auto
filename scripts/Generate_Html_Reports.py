@@ -13,7 +13,6 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 from PyPDF2 import PdfReader, PdfWriter
 
-
 # === Définition des chemins de base ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "..", "app", "templates")
@@ -21,7 +20,6 @@ HTML_BASE_DIR = os.path.join(BASE_DIR, "..", "html")
 PDF_BASE_DIR = os.path.join(BASE_DIR, "..", "pdf")
 DATA_DIR = os.path.join(BASE_DIR, "..", "exports")
 CONFIG_PDF_PATH = os.path.join(BASE_DIR, "..", "data", "config_pdf.xlsx")
-
 
 # === Analyse des arguments de ligne de commande ===
 parser = argparse.ArgumentParser(description="Génère les rapports HTML (et optionnellement les PDF)")
@@ -55,7 +53,6 @@ def format_virgule_1(valeur):
 env.filters['virgule'] = format_virgule
 env.filters['virgule1'] = format_virgule_1
 
-
 def html_to_pdf_with_playwright(html_path, pdf_output_path):
     try:
         with sync_playwright() as p:
@@ -69,7 +66,6 @@ def html_to_pdf_with_playwright(html_path, pdf_output_path):
     except Exception as e:
         print(f"❌ Erreur PDF Playwright : {e}")
         return False
-
 
 def decouper_pdf(source_path, output_path, pages_str):
     try:
@@ -85,7 +81,6 @@ def decouper_pdf(source_path, output_path, pages_str):
             else:
                 pages.append(int(part) - 1)
 
-        # Nettoyage et tri
         pages = sorted(set(pages))
 
         print(f"📄 Nombre total de pages dans le PDF complet : {len(reader.pages)}")
@@ -106,7 +101,6 @@ def decouper_pdf(source_path, output_path, pages_str):
         print(f"❌ Erreur découpe PDF : {e}")
         return False
 
-
 def charger_contrat_data(client_dir, periode):
     short_periode = periode[2:]
     periode_dir = os.path.join(DATA_DIR, client_dir, short_periode)
@@ -115,13 +109,11 @@ def charger_contrat_data(client_dir, periode):
         print(f"❌ Période non trouvée : {periode_dir}")
         return []
 
-    # Liste les sous-dossiers
     sous_dossiers = [d for d in os.listdir(periode_dir) if os.path.isdir(os.path.join(periode_dir, d))]
     if not sous_dossiers:
         print(f"❌ Aucun sous-dossier trouvé dans : {periode_dir}")
         return []
 
-    # 🧠 Trie les dossiers en priorité : mensuel < annuel < reste
     def priorite_dashboard(nom):
         nom_lower = nom.lower()
         if "mensuel" in nom_lower:
@@ -133,7 +125,6 @@ def charger_contrat_data(client_dir, periode):
 
     sous_dossiers = sorted(sous_dossiers, key=priorite_dashboard)
 
-    # Chargement des triplets (valeurs, meta, chemin_meta, dossier)
     triplets = []
     for dossier in sous_dossiers:
         tmp_path = os.path.join(periode_dir, dossier)
@@ -150,7 +141,6 @@ def charger_contrat_data(client_dir, periode):
                 print(f"⛔ Erreur lecture JSON dans {tmp_valeurs} : {e}")
 
     return triplets
-
 
 def generate_report(client_dir, periode):
     print(f"\n🔧 Génération du rapport pour {client_dir} ({periode})")
@@ -188,7 +178,6 @@ def generate_report(client_dir, periode):
     mois_str = datetime.strptime(periode, "%Y-%m").strftime("%B %Y").capitalize()
     contexte["periode_client"] = mois_str
 
-    # Utilisation du template global unique
     try:
         tpl = env.get_template("template_global.html")
         final_html = tpl.render(**contexte)
@@ -235,7 +224,6 @@ def generate_report(client_dir, periode):
         return True
 
     periode_pdf = short_periode.replace("-", "")
-
     nom_pdf_complet = f"{client_dir}-{periode_pdf}-FiTT"
     nom_pdf_partiel = f"{client_dir}-{periode_pdf}"
     pages_partiel = row.iloc[0]['Pages_Partiel']
@@ -260,8 +248,6 @@ def generate_report(client_dir, periode):
     print(f"   PDF Partiel  {statut_partiel}  {nom_pdf_partiel}.pdf")
 
     return True
-
-
 
 def generate_all_reports(periode):
     contrats_dir = os.path.join(DATA_DIR)
@@ -288,6 +274,5 @@ def generate_all_reports(periode):
     print(f"❌ Échecs : {len(erreurs)}")
     if erreurs:
         print("🔎 Contrats en erreur :", ", ".join(erreurs))
-
 
 generate_all_reports(periode_reference)

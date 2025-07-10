@@ -40,7 +40,13 @@ def enrichir_valeurs(valeurs, meta_path=None, client_dir="unknown_client", perio
     # Alias de valeurs : 1_, 2_, etc.
     for original, alias in alias_map.items():
         if original in valeurs:
-            enrichies[alias] = valeurs[original]
+            valeur_brute = valeurs[original]
+            if isinstance(valeur_brute, dict):
+                enrichies[f"{alias}_val"] = valeur_brute.get("valeur", "")
+                enrichies[f"{alias}_unit"] = valeur_brute.get("unite", "")
+            else:
+                enrichies[f"{alias}_val"] = valeur_brute
+                enrichies[f"{alias}_unit"] = ""
 
     # Calculs dynamiques (peu importe le type de dashboard)
     enrichies["performance_contrat_kwh"] = performance_kwh(valeurs)

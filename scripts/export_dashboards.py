@@ -3,7 +3,7 @@ import json
 import re
 import unicodedata
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -68,13 +68,13 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
         page.wait_for_timeout(1000)
 
         # Conversion en timestamp Unix (millisecondes)
-        from_epoch = int(pd.to_datetime(from_str).timestamp() * 1000)
-        to_epoch = int(pd.to_datetime(to_str).timestamp() * 1000)
+        from_epoch = int((pd.to_datetime(from_str) - pd.Timedelta(hours=2)).timestamp() * 1000)
+        to_epoch   = int((pd.to_datetime(to_str)   - pd.Timedelta(hours=2)).timestamp() * 1000)
 
         url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_epoch}&to={to_epoch}"
         print(f"➡️ Chargement du dashboard : {url}")
         page.goto(url)
-        page.wait_for_timeout(20000)
+        page.wait_for_timeout(12000)
 
         current_url = page.url
         expected_slug = normalize_slug(slug)
@@ -83,7 +83,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
             return
 
         page.reload()
-        page.wait_for_timeout(15000)
+        page.wait_for_timeout(8000)
 
         all_panels = page.locator("div.panel-container, div.react-grid-item")
         total = all_panels.count()
@@ -122,13 +122,17 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
             elif ptype == "stat":
                 raw = panel.text_content().strip()
-                match = re.search(r"(.*?)([\-]?\d+[.,]?\d*)\s?(?:kWh|MWh|%|€|kW)?", raw)
+                match = re.search(r"(.*?)([-]?\d+[.,]?\d*)\s?(kWh|MWh|%|€|kW)?", raw)
                 if match:
                     label = match.group(1).strip() or f"valeur_{pid}"
                     val = match.group(2).strip()
+                    unit = match.group(3) or ""
                     key = f"{pid}_{label.replace(' ', '_')}"
-                    values[key] = val
-                    print(f"   🔢 Valeur extraite (sans unité) : {key} = {val}")
+                    values[key] = {
+                        "valeur": val,
+                        "unite": unit
+                    }
+                    print(f"   🔢 Valeur extraite : {key} = {val} {unit}")
                 else:
                     print(f"   ❌ Aucune valeur détectée dans panel #{pid}")
 
@@ -182,7 +186,6 @@ def main():
 
     mois_precedent = get_previous_month_range()
     periode_reference_short = mois_precedent[1].strftime("%y-%m")
-    date_fin_mois_precedent = mois_precedent[1].strftime("%Y-%m-%dT23:59:59Z")
 
     groupes = df.groupby(["Contrat", "UID Dashboard", "Nom du Dashboard"])
 
