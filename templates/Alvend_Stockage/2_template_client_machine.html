@@ -11,13 +11,13 @@
 
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
-                <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_elec | virgule }} %</h2>
+                <h3 class="cles">CLÉSCHIFFRES</h3>
+                <h2 class="pourcentage">{{ performance_contrat_percent_elec_val | virgule1 }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec }} %</h2>
-                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract }} %</h2> -->
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_val }} %</h2>
+                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_elec_val }} %</h2> -->
                 </div>
             </div>
             
@@ -32,8 +32,8 @@
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif_elec | virgule1 }} <span class="unite">MWh</span></p>
-                    <p>{{ consommation_reelle_elec | virgule1 }} <span class="unite">MWh</span></p>
+                    <p>{{ modele_predictif_elec_val | virgule1 }} <span class="unite">{{modele_predictif_elec_unit}}</span></p>
+                    <p>{{ consommation_reelle_elec_val | virgule1 }} <span class="unite">{{consommation_reelle_elec_unit}}</span></p>
                     <hr class="hr-resultat">
                     <p>{{ performance_contrat_kwh | virgule1 }} <span class="unite">MWh</span></p>
                 </div>
@@ -62,12 +62,12 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year| virgule1  }} %</h2>
+                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year_val| virgule1  }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso_year }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_year }} %</h2>
-                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract }} %</h2> -->
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_year_val }} %</h2>
+                    <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_elec_year_val }} %</h2> -->
                 </div>
             </div>    
 
@@ -83,8 +83,8 @@
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif_elec_year| virgule1  }} <span class="unite">MWh</span></p>
-                    <p>{{ consommation_reelle_elec_year| virgule1  }} <span class="unite">MWh</span></p>
+                    <p>{{ modele_predictif_elec_year_val| virgule1  }} <span class="unite">{{modele_predictif_elec_year_unit}}</span></p>
+                    <p>{{ consommation_reelle_elec_year_val| virgule1  }} <span class="unite">{{consommation_reelle_elec_year_unit}}</span></p>
                     <hr class="hr-resultat">
                     <p>{{ performance_contrat_kwh_year| virgule1  }} <span class="unite">MWh</span></p>
                 </div>
@@ -96,7 +96,7 @@
 
             <div class="support-graphique">
                 <h2>Superposition des consommations - de Janvier 2025 à {{ periode_client }}</h2>
-                <img class="graphic_image" src="{{ superposition_predictif_reelle_year }}" alt="superposition_predictif_reelle-picture">
+                <img class="graphic_image" src="{{ superposition_predictif_reelle_year_alvend }}" alt="superposition_predictif_reelle-picture">
             </div>
 
             <hr class="bottom_hr_bleu">
