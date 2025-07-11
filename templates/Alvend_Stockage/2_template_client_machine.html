@@ -28,14 +28,14 @@
                     <p>Consommation Prédite sans AEE de</p>
                     <p>Consommation Réelle de</p>
                     <hr class="hr-conso">
-                    <p>Soit {{ gain_perte }} de</p>
+                    <p>Soit {{ gain_perte_elec }} de</p>
                 </div>
                 
                 <div class="support-conso_colonne-droite">
                     <p>{{ modele_predictif_elec_val | virgule1 }} <span class="unite">{{modele_predictif_elec_unit}}</span></p>
                     <p>{{ consommation_reelle_elec_val | virgule1 }} <span class="unite">{{consommation_reelle_elec_unit}}</span></p>
                     <hr class="hr-resultat">
-                    <p>{{ performance_contrat_kwh | virgule1 }} <span class="unite">MWh</span></p>
+                    <p>{{ performance_contrat_kwh_elec | virgule1 }} <span class="unite">MWh</span></p>
                 </div>
             </div>
                      
@@ -62,7 +62,7 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year_val| virgule1  }} %</h2>
+                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year_val | virgule1 }} %</h2>
                 
                 <div class="support_engagement">
                     <p class="eco_surconso">{{ eco_surconso_year }} pour un engagement <br>non contractuel de</p>
@@ -79,14 +79,14 @@
                     <p>Consommation Prédite sans AEE de</p>
                     <p>Consommation Réelle de</p>
                     <hr class="hr-conso">
-                    <p>Soit {{ gain_perte_year }} de</p>
+                    <p>Soit {{ gain_perte_elec_year }} de</p>
                 </div>
                 
                 <div class="support-conso_colonne-droite">
                     <p>{{ modele_predictif_elec_year_val| virgule1  }} <span class="unite">{{modele_predictif_elec_year_unit}}</span></p>
                     <p>{{ consommation_reelle_elec_year_val| virgule1  }} <span class="unite">{{consommation_reelle_elec_year_unit}}</span></p>
                     <hr class="hr-resultat">
-                    <p>{{ performance_contrat_kwh_year| virgule1  }} <span class="unite">MWh</span></p>
+                    <p>{{ performance_contrat_kwh_elec_year| virgule1  }} <span class="unite">MWh</span></p>
                 </div>
             </div>
 
@@ -95,7 +95,7 @@
 
 
             <div class="support-graphique">
-                <h2>Superposition des consommations - de Janvier 2025 à {{ periode_client }}</h2>
+                <h2>Superposition des consommations de {{date_debut_cpe_annuel}} à {{ periode_client }}</h2>
                 <img class="graphic_image" src="{{ superposition_predictif_reelle_year_alvend }}" alt="superposition_predictif_reelle-picture">
             </div>
 
