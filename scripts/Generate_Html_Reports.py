@@ -5,6 +5,7 @@ import locale
 import time
 import argparse
 import pandas as pd
+import re
 from jinja2 import Environment, FileSystemLoader
 from display_enrichies import enrichir_valeurs
 from export_dashboards import normalize_slug
@@ -20,6 +21,9 @@ HTML_BASE_DIR = os.path.join(BASE_DIR, "..", "html")
 PDF_BASE_DIR = os.path.join(BASE_DIR, "..", "pdf")
 DATA_DIR = os.path.join(BASE_DIR, "..", "exports")
 CONFIG_PDF_PATH = os.path.join(BASE_DIR, "..", "data", "config_pdf.xlsx")
+CONTRATS_FITT_PATH = os.path.join(BASE_DIR, "..", "data", "Contrats_FiTT.xlsx")
+contrats_fitt_df = pd.read_excel(CONTRATS_FITT_PATH)
+
 
 # === Analyse des arguments de ligne de commande ===
 parser = argparse.ArgumentParser(description="Génère les rapports HTML (et optionnellement les PDF)")
@@ -170,6 +174,45 @@ def generate_report(client_dir, periode):
     contexte["name_client"] = client_dir
     contexte["nom_affiche_client"] = image_aliases.get(client_dir, client_dir)
 
+
+
+
+# === Récupération de la date de début CPE depuis Contrats_FiTT.xlsx ===
+    try:
+        contrat_rows = contrats_fitt_df[contrats_fitt_df['Contrat'].str.lower() == client_dir.lower()]
+
+        for _, row in contrat_rows.iterrows():
+            nom_dashboard = str(row.get('Nom du Dashboard', ''))
+            if "cpe_annuel" not in nom_dashboard.lower():
+                continue
+
+            date_debut_raw = row.get("Date Début", None)
+
+            # Vérification et parsing de la date
+            if isinstance(date_debut_raw, (pd.Timestamp, datetime)):
+                date_obj = pd.to_datetime(date_debut_raw)
+            elif isinstance(date_debut_raw, str) and re.match(r"\d{4}-\d{2}-\d{2}", date_debut_raw):
+                date_obj = pd.to_datetime(date_debut_raw)
+            else:
+                continue
+
+            # Formatage en français
+            try:
+                locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+            except:
+                locale.setlocale(locale.LC_TIME, 'French_France.1252')
+
+            contexte["date_debut_cpe_annuel"] = date_obj.strftime("%B %Y").capitalize()
+            break  # On arrête dès qu'on trouve un CPE annuel valide
+    except Exception as e:
+        print(f"⚠️ Erreur date_debut_cpe_annuel pour {client_dir} : {e}")
+
+
+
+
+
+
+
     if platform.system() == "Windows":
         locale.setlocale(locale.LC_TIME, 'French_France.1252')
     else:
@@ -179,6 +222,7 @@ def generate_report(client_dir, periode):
     contexte["periode_client"] = mois_str
 
     try:
+        print(f"🧪 Date début CPE pour {client_dir} : {contexte.get('date_debut_cpe_annuel')}")
         tpl = env.get_template("template_global.html")
         final_html = tpl.render(**contexte)
     except Exception as e:

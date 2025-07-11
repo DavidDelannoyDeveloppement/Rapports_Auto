@@ -3,8 +3,8 @@ import json
 from export_dashboards import normalize_slug
 from alias_resolver import resolve_alias_map
 from display import (
-    performance_kwh, gain_perte, engagement_color, eco_surconso,
-    performance_kwh_year, gain_perte_year, engagement_color_year, eco_surconso_year
+    performance_kwh, gain_perte,performance_kwh_elec, gain_perte_elec,performance_kwh_gaz, gain_perte_gaz, engagement_color, eco_surconso,
+    performance_kwh_year, gain_perte_year,performance_kwh_elec_year, gain_perte_elec_year,performance_kwh_gaz_year, gain_perte_gaz_year, engagement_color_year, eco_surconso_year
 )
 
 def enrichir_valeurs(valeurs, meta_path=None, client_dir="unknown_client", periode="00-00"):
@@ -51,11 +51,19 @@ def enrichir_valeurs(valeurs, meta_path=None, client_dir="unknown_client", perio
     # Calculs dynamiques (peu importe le type de dashboard)
     enrichies["performance_contrat_kwh"] = performance_kwh(valeurs)
     enrichies["gain_perte"] = gain_perte(valeurs)
+    enrichies["performance_contrat_kwh_elec"] = performance_kwh_elec(valeurs)
+    enrichies["gain_perte_elec"] = gain_perte_elec(valeurs)
+    enrichies["performance_contrat_kwh_gaz"] = performance_kwh_gaz(valeurs)
+    enrichies["gain_perte_gaz"] = gain_perte_gaz(valeurs)
     enrichies["engagement_color"] = engagement_color(valeurs)
     enrichies["eco_surconso"] = eco_surconso(valeurs)
 
     enrichies["performance_contrat_kwh_year"] = performance_kwh_year(valeurs)
     enrichies["gain_perte_year"] = gain_perte_year(valeurs)
+    enrichies["performance_contrat_kwh_elec_year"] = performance_kwh_elec_year(valeurs)
+    enrichies["gain_perte_elec_year"] = gain_perte_elec_year(valeurs)
+    enrichies["performance_contrat_kwh_gaz_year"] = performance_kwh_gaz_year(valeurs)
+    enrichies["gain_perte_gaz_year"] = gain_perte_gaz_year(valeurs)
     enrichies["engagement_color_year"] = engagement_color_year(valeurs)
     enrichies["eco_surconso_year"] = eco_surconso_year(valeurs)
 
