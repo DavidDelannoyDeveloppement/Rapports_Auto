@@ -208,11 +208,6 @@ def generate_report(client_dir, periode):
         print(f"⚠️ Erreur date_debut_cpe_annuel pour {client_dir} : {e}")
 
 
-
-
-
-
-
     if platform.system() == "Windows":
         locale.setlocale(locale.LC_TIME, 'French_France.1252')
     else:
@@ -222,7 +217,7 @@ def generate_report(client_dir, periode):
     contexte["periode_client"] = mois_str
 
     try:
-        print(f"🧪 Date début CPE pour {client_dir} : {contexte.get('date_debut_cpe_annuel')}")
+        print(f"🧪 Date début CPE Annuel pour {client_dir} : {contexte.get('date_debut_cpe_annuel')}")
         tpl = env.get_template("template_global.html")
         final_html = tpl.render(**contexte)
     except Exception as e:

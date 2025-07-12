@@ -21,26 +21,36 @@ alias_groups = {
             "2_Conso_Elec_+_Gaz": "consommation_reelle_combine",
             "1_Consommation_d'électricité": "consommation_reelle_elec",
             "8_Conso_Élec": "consommation_reelle_elec",
+            "2_Conso_Élec": "consommation_reelle_elec",
+            "8_Conso_Gaz":"consommation_reelle_gaz",
             "14_Conso_Gaz":"consommation_reelle_gaz",
             #Conso Prédite : 
             "3_Conso_Prédite_Elec_+_Gaz": "modele_predictif_combine",
             "2_Prédiction_d'électricité": "modele_predictif_elec",
+            "3_Conso_Prédite_Élec": "modele_predictif_elec",
             "9_Conso_Prédite_Élec": "modele_predictif_elec",
+            "9_Conso_Prédite_Gaz":"modele_predictif_gaz",
             "15_Conso_Prédite_Gaz":"modele_predictif_gaz",
             #Perf ou Éco : 
             "4_Eco_Elec_+_Gaz": "performance_contrat_percent_combine",
             "3_Economie_d'électricité": "performance_contrat_percent_elec",
+            "4_Eco_Elec": "performance_contrat_percent_elec",
             "10_Eco_Elec": "performance_contrat_percent_elec",
             "16_Eco_Gaz":"performance_contrat_percent_gaz",
+            "10_Eco_Gaz":"performance_contrat_percent_gaz",
             #Engagement : 
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec",
+            "5_Engagement_Contractuel_Élec": "engagement_contract_elec",
             "5_Engagement_Contractuel_Élec_+_Gaz":"engagement_contract_combine",
+            "11_Engagement_Contractuel_Gaz":"engagement_contract_gaz"
 
         },
         "images": {
             "superposition_predictif_reelle_alvend": "graph_5.png",
             "superposition_predictif_reelle_itm": "graph_6.png",
             "superposition_predictif_reelle_elec_itm": "graph_12.png",
+            "superposition_predictif_reelle_elec_separe_itm": "graph_6.png",
+            "superposition_predictif_reelle_gaz_separe_itm": "graph_12.png",
             "superposition_predictif_reelle_gaz_itm": "graph_18.png",
         }
     },
@@ -49,20 +59,28 @@ alias_groups = {
             #Conso réelle : 
             "2_Conso_Elec_+_Gaz": "consommation_reelle_combine_year",
             "1_Consommation_d'électricité": "consommation_reelle_elec_year",
+            "2_Conso_Élec": "consommation_reelle_elec_year",
+            "8_Conso_Gaz":"consommation_reelle_gaz_year",
             "8_Conso_Élec": "consommation_reelle_elec_year",
             "14_Conso_Gaz":"consommation_reelle_gaz_year",
             #Conso Prédite : 
             "3_Conso_Prédite_Elec_+_Gaz": "modele_predictif_combine_year",
             "2_Prédiction_d'électricité": "modele_predictif_elec_year",
+            "3_Conso_Prédite_Élec": "modele_predictif_elec_year",
             "9_Conso_Prédite_Élec": "modele_predictif_elec_year",
+            "9_Conso_Prédite_Gaz":"modele_predictif_gaz_year",
             "15_Conso_Prédite_Gaz":"modele_predictif_gaz_year",
             #Perf ou Éco : 
             "4_Eco_Elec_+_Gaz": "performance_contrat_percent_combine_year",
             "3_Economie_d'électricité": "performance_contrat_percent_elec_year",
+            "4_Eco_Elec": "performance_contrat_percent_elec_year",
+            "10_Eco_Gaz":"performance_contrat_percent_gaz_year",
             "10_Eco_Elec": "performance_contrat_percent_elec_year",
             "16_Eco_Gaz":"performance_contrat_percent_gaz_year",
             #Engagement : 
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec_year",
+            "5_Engagement_Contractuel_Élec": "engagement_contract_elec_year",
+            "11_Engagement_Contractuel_Gaz":"engagement_contract_gaz_year",
             "5_Engagement_Contractuel_Élec_+_Gaz":"engagement_contract_combine_year",
 
         },
@@ -70,6 +88,8 @@ alias_groups = {
             "superposition_predictif_reelle_year_alvend": "graph_5.png",
             "superposition_predictif_reelle_year_itm": "graph_6.png",
             "superposition_predictif_reelle_elec_year_itm": "graph_12.png",
+            "superposition_predictif_reelle_elec_separe_year_itm": "graph_6.png",
+            "superposition_predictif_reelle_gaz_separe_year_itm": "graph_12.png",
             "superposition_predictif_reelle_gaz_year_itm": "graph_18.png",
         }
     },
@@ -79,13 +99,13 @@ alias_groups = {
         },
         "images": {
             "temperatures": "graph_1.png",
-            "temperatures_process": "graph_2.png",
-            "temperatures_opt":"graph_3.png,",
+            "temperatures_process": "graph_1.png",
+            "temperatures_opt":"graph_2.png",
             "mode_fonctionnement_alvend": "graph_2.png",
             "mode_fonctionnement": "graph_3.png",
             "taux_compression_alvend": "graph_3.png",
             "taux_compression": "graph_4.png",
-            "delta_temperatures":"graph_5.png",
+            "delta_temperatures":"graph_6.png",
             "sante_circuit_1": "graph_4.png",
             "sante_circuit_2": "graph_5.png",
             "intensite_compresseurs": "graph_7.png",
@@ -113,5 +133,7 @@ def resolve_alias_map(dashboard_name: str) -> dict:
         return alias_groups["analyse"]
     elif "annuel" in name:
         return alias_groups["annuel"]
+    elif "performances" in name:
+        return alias_groups["performances"]
     else:
         return alias_groups["mensuel"]
