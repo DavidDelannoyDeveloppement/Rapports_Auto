@@ -12,11 +12,11 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉSCHIFFRES</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_elec_val | virgule1 }} %</h2>
+                <h2 class="pourcentage">{{valeurs("performance_contrat_percent_elec_val") | virgule1 }} %</h2>
                 
                 <div class="support_engagement">
-                    <p class="eco_surconso">{{ eco_surconso }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_val }} %</h2>
+                    <p class="eco_surconso">{{valeurs("eco_surconso") }} pour un engagement <br>non contractuel de</p>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{valeurs("engagement_contract_elec_val") }} %</h2>
                     <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_elec_val }} %</h2> -->
                 </div>
             </div>
@@ -28,14 +28,14 @@
                     <p>Consommation Prédite sans AEE de</p>
                     <p>Consommation Réelle de</p>
                     <hr class="hr-conso">
-                    <p>Soit {{ gain_perte_elec }} de</p>
+                    <p>Soit {{ valeurs("gain_perte_elec") }} de</p>
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif_elec_val | virgule1 }} <span class="unite">{{modele_predictif_elec_unit}}</span></p>
-                    <p>{{ consommation_reelle_elec_val | virgule1 }} <span class="unite">{{consommation_reelle_elec_unit}}</span></p>
+                    <p>{{ valeurs("modele_predictif_elec_val") | virgule1 }} <span class="unite">{{valeurs("modele_predictif_elec_unit")}}</span></p>
+                    <p>{{ valeurs("consommation_reelle_elec_val") | virgule1 }} <span class="unite">{{valeurs("consommation_reelle_elec_unit")}}</span></p>
                     <hr class="hr-resultat">
-                    <p>{{ performance_contrat_kwh_elec | virgule1 }} <span class="unite">MWh</span></p>
+                    <p>{{ valeurs("performance_contrat_kwh_elec") | virgule1 }} <span class="unite">MWh</span></p>
                 </div>
             </div>
                      
@@ -62,11 +62,11 @@
             <div class="chiffres-cles">
                 <h3 class="chiffres">CHIFFRES</h3>
                 <h3 class="cles">CLÉS</h3>
-                <h2 class="pourcentage">{{ performance_contrat_percent_elec_year_val| virgule1  }} %</h2>
+                <h2 class="pourcentage">{{ valeurs("performance_contrat_percent_elec_year_val")| virgule1  }} %</h2>
                 
                 <div class="support_engagement">
-                    <p class="eco_surconso">{{ eco_surconso_year }} pour un engagement <br>non contractuel de</p>
-                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ engagement_contract_elec_year_val }} %</h2>
+                    <p class="eco_surconso">{{ valeurs("eco_surconso_year") }} pour un engagement <br>non contractuel de</p>
+                    <h2 class="pourcentage-contrat" style="color: #00a250;">{{ valeurs("engagement_contract_elec_year_val") }} %</h2>
                     <!-- <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_elec_year_val }} %</h2> -->
                 </div>
             </div>    
@@ -79,14 +79,14 @@
                     <p>Consommation Prédite sans AEE de</p>
                     <p>Consommation Réelle de</p>
                     <hr class="hr-conso">
-                    <p>Soit {{ gain_perte_elec_year }} de</p>
+                    <p>Soit {{ valeurs("gain_perte_elec_year") }} de</p>
                 </div>
                 
                 <div class="support-conso_colonne-droite">
-                    <p>{{ modele_predictif_elec_year_val| virgule1  }} <span class="unite">{{modele_predictif_elec_year_unit}}</span></p>
-                    <p>{{ consommation_reelle_elec_year_val| virgule1  }} <span class="unite">{{consommation_reelle_elec_year_unit}}</span></p>
+                    <p>{{ valeurs("modele_predictif_elec_year_val")| virgule1  }} <span class="unite">{{valeurs("modele_predictif_elec_year_unit")}}</span></p>
+                    <p>{{ valeurs("consommation_reelle_elec_year_val")| virgule1  }} <span class="unite">{{valeurs("consommation_reelle_elec_year_unit")}}</span></p>
                     <hr class="hr-resultat">
-                    <p>{{ performance_contrat_kwh_elec_year| virgule1  }} <span class="unite">MWh</span></p>
+                    <p>{{ valeurs("performance_contrat_kwh_elec_year")| virgule1  }} <span class="unite">MWh</span></p>
                 </div>
             </div>
 
