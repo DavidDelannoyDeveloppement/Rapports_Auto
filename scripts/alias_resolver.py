@@ -48,6 +48,7 @@ alias_groups = {
         "images": {
             "superposition_predictif_reelle_alvend": "graph_5.png",
             "superposition_predictif_reelle_itm": "graph_6.png",
+            "superposition_predictif_reelle_quercy": "graph_6.png",
             "superposition_predictif_reelle_elec_itm": "graph_12.png",
             "superposition_predictif_reelle_elec_separe_itm": "graph_6.png",
             "superposition_predictif_reelle_gaz_separe_itm": "graph_12.png",
@@ -87,6 +88,7 @@ alias_groups = {
         "images": {
             "superposition_predictif_reelle_year_alvend": "graph_5.png",
             "superposition_predictif_reelle_year_itm": "graph_6.png",
+            "superposition_predictif_reelle_year_quercy": "graph_6.png",
             "superposition_predictif_reelle_elec_year_itm": "graph_12.png",
             "superposition_predictif_reelle_elec_separe_year_itm": "graph_6.png",
             "superposition_predictif_reelle_gaz_separe_year_itm": "graph_12.png",

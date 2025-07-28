@@ -5,17 +5,19 @@ def chercher_valeur(valeurs, possibles):
             if isinstance(data, dict):
                 val = float(data.get("valeur", 0))
                 unit = data.get("unite", "").strip().lower()
-                # Conversion vers kWh si besoin
-                if unit == "mwh":
-                    val *= 1000
+
+                # === Conversion vers kWh ===
+                if unit == "gwh":
+                    val *= 1_000_000
+                elif unit == "mwh":
+                    val *= 1_000
                 elif unit == "wh":
-                    val /= 1000
-                # sinon déjà en kWh ou inconnu (on laisse tel quel)
+                    val /= 1_000
+                # kWh ou inconnu : on laisse tel quel
+
                 return val
             else:
                 return float(data)
-    # print("🔎 Clés possibles testées :", possibles)
-    # print("📦 Clés disponibles :", list(valeurs.keys()))        
     raise KeyError("Aucune des clés possibles trouvée.")
 
 

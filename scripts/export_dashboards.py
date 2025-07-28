@@ -14,9 +14,12 @@ project_root = os.path.dirname(script_dir)
 dotenv_path = os.path.join(project_root, ".env")
 load_dotenv(dotenv_path)
 
+
 username = os.getenv("GRAFANA_USER")
 password = os.getenv("GRAFANA_PASS")
 grafana_base = "https://view.preprod.fitt-solutions.fr"
+if not username or not password:
+    raise ValueError("❌ Les identifiants Grafana ne sont pas définis dans le fichier .env.")
 
 # === CHARGEMENT DU FICHIER CONTRATS ===
 excel_path = os.path.join(project_root, "data", "Contrats_FiTT.xlsx")
@@ -122,7 +125,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
             elif ptype == "stat":
                 raw = panel.text_content().strip()
-                match = re.search(r"(.*?)([-]?\d+[.,]?\d*)\s?(kWh|MWh|%|€|kW)?", raw)
+                match = re.search(r"(.*?)([-]?\d+[.,]?\d*)\s?(kWh|GWh|MWh|%|€|kW)?", raw)
                 if match:
                     label = match.group(1).strip() or f"valeur_{pid}"
                     val = match.group(2).strip()
