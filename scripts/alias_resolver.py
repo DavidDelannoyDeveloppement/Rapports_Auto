@@ -11,6 +11,7 @@ image_aliases = {
     "ITM_PAM": "ITM Pont-à-Marcq",
     "Quercy_Cholet2": "Quercy Cholet2",
     "Quercy_Guilmot_Gaudais": "Quercy Guilmot Gaudais",
+    "Leclerc_Vouziers": "Leclerc Vouziers",
     
 }
 

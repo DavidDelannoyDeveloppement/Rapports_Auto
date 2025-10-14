@@ -14,7 +14,6 @@ project_root = os.path.dirname(script_dir)
 dotenv_path = os.path.join(project_root, ".env")
 load_dotenv(dotenv_path)
 
-
 username = os.getenv("GRAFANA_USER")
 password = os.getenv("GRAFANA_PASS")
 grafana_base = "https://view.preprod.fitt-solutions.fr"
@@ -44,6 +43,64 @@ def normalize_slug(text):
     text = re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
     return text
 
+# =====================================================================
+#                   TIMEOUTS & TEMPOS (ajouts)
+# =====================================================================
+NAV_TIMEOUT = 40_000          # navigation lourde Grafana
+PANEL_TIMEOUT = 20_000        # attente d'un panel individuel
+POST_LOGIN_PAUSE = 3_000      # souffle après login
+POST_RELOAD_PAUSE = 20_000    # temps après reload pour stabiliser
+SCROLL_STEP = 1200            # px par scroll
+SCROLL_PAUSE = 600            # pause entre scrolls
+
+# =====================================================================
+#                   HELPERS (ajouts)
+# =====================================================================
+def wait_until_panels_listed(page):
+    """Attend que la liste de panels soit présente et visible."""
+    locator = page.locator("div.panel-container, div.react-grid-item")
+    try:
+        locator.first.wait_for(state="visible", timeout=PANEL_TIMEOUT)
+    except Exception:
+        # S'il n'y a pas encore de panel visible, attend que >0 existent dans le DOM
+        page.wait_for_function(
+            """() => document.querySelectorAll('div.panel-container, div.react-grid-item').length > 0""",
+            timeout=PANEL_TIMEOUT
+        )
+    return page.locator("div.panel-container, div.react-grid-item")
+
+def wait_until_panel_ready(panel):
+    """Assure visibilité, scroll dans le viewport et présence éventuelle de canvas/svg."""
+    panel.wait_for(state="visible", timeout=PANEL_TIMEOUT)
+    panel.scroll_into_view_if_needed(timeout=PANEL_TIMEOUT)
+    # Forcer le layout
+    try:
+        panel.bounding_box()
+    except Exception:
+        pass
+    # Attendre un canvas/svg si c'est un graph (toléré si stat/table)
+    try:
+        panel.locator("canvas, svg").first.wait_for(state="visible", timeout=PANEL_TIMEOUT // 2)
+    except Exception:
+        pass
+    # petite pause pour finir les rendus
+    time.sleep(0.2)
+
+def slow_scroll_through_dashboard(page):
+    """Scroll progressif sur toute la page pour déclencher les rendus lazy."""
+    page.evaluate("window.scrollTo(0, 0)")
+    time.sleep(0.3)
+    total_height = page.evaluate("() => document.body.scrollHeight")
+    y = 0
+    while y < total_height:
+        y += SCROLL_STEP
+        page.evaluate(f"window.scrollTo(0, {y})")
+        page.wait_for_timeout(SCROLL_PAUSE)
+        total_height = page.evaluate("() => document.body.scrollHeight")
+    # Remonter légèrement pour stabiliser
+    page.evaluate("window.scrollTo(0, Math.max(document.body.scrollHeight - 800, 0))")
+    page.wait_for_timeout(800)
+
 # === EXPORTATION DASHBOARD ===
 def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_str, periode_reference):
     export_dir = os.path.join(project_root, "exports", contrat, periode_reference, normalize_slug(slug))
@@ -56,18 +113,20 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={"width": 1920, "height": 4000})
+        context = browser.new_context(viewport={"width": 1920, "height": 5000})
+        context.set_default_timeout(NAV_TIMEOUT)
         page = context.new_page()
+        page.set_default_timeout(NAV_TIMEOUT)
 
         print("🔐 Connexion à Grafana...")
-        page.goto(f"{grafana_base}/login")
+        page.goto(f"{grafana_base}/login", wait_until="domcontentloaded")
         page.fill('input[name="user"]', username)
         page.fill('input[name="password"]', password)
         page.click('button[type="submit"]')
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(POST_LOGIN_PAUSE)
 
         print("🧼 Nettoyage état précédent (about:blank)...")
-        page.goto("about:blank")
+        page.goto("about:blank", wait_until="domcontentloaded")
         page.wait_for_timeout(1000)
 
         # Conversion en timestamp Unix (millisecondes)
@@ -76,8 +135,7 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
 
         url = f"{grafana_base}/d/{uid}/{slug}?orgId=1&from={from_epoch}&to={to_epoch}"
         print(f"➡️ Chargement du dashboard : {url}")
-        page.goto(url)
-        page.wait_for_timeout(12000)
+        page.goto(url, wait_until="networkidle", timeout=NAV_TIMEOUT)
 
         current_url = page.url
         expected_slug = normalize_slug(slug)
@@ -85,12 +143,20 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
             print(f"❌ Mismatch dashboard : attendu '{expected_slug}', mais trouvé : '{current_url}'")
             return
 
-        page.reload()
-        page.wait_for_timeout(8000)
+        page.reload(wait_until="networkidle", timeout=NAV_TIMEOUT)
+        page.wait_for_timeout(POST_RELOAD_PAUSE)
 
-        all_panels = page.locator("div.panel-container, div.react-grid-item")
+        all_panels = wait_until_panels_listed(page)
         total = all_panels.count()
         print(f"🔎 Panels détectés : {total}")
+
+        # Déclencher le rendu de tous les panels en scrollant
+        slow_scroll_through_dashboard(page)
+
+        # Recompter après scroll (le layout peut évoluer)
+        all_panels = page.locator("div.panel-container, div.react-grid-item")
+        total = all_panels.count()
+        print(f"🔁 Panels comptés après scroll : {total}")
 
         values = {}
         images = []
@@ -103,18 +169,29 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
                 continue
 
             panel = all_panels.nth(pid)
+            try:
+                wait_until_panel_ready(panel)
+            except Exception as e:
+                print(f"   ⚠️ Panel #{pid} pas prêt dans les temps : {e}")
+                continue
 
             if ptype == "graph":
-                panel.evaluate("""
-                    (el) => {
-                        const header = el.querySelector('[data-testid="header-container"]');
-                        if (header) header.style.display = 'none';
-                    }
-                """)
+                # Masquer l'entête (si présent) pour des captures nettes
+                try:
+                    panel.evaluate("""
+                        (el) => {
+                            const header = el.querySelector('[data-testid="header-container"]');
+                            if (header) header.style.display = 'none';
+                        }
+                    """)
+                except Exception:
+                    pass
+
                 path = os.path.join(export_dir, f"graph_{pid}.png")
                 handle = panel.element_handle()
                 if handle:
                     try:
+                        page.wait_for_timeout(600)  # micro-stabilisation des courbes
                         handle.screenshot(path=path)
                         images.append(f"graph_{pid}.png")
                         print(f"   📸 Graphique capturé : graph_{pid}.png")
@@ -143,6 +220,10 @@ def export_dashboard(contrat, uid, slug, panel_ids, panel_types, from_str, to_st
                 handle = panel.element_handle()
                 if handle:
                     rows = panel.locator('div[role="row"]')
+                    try:
+                        rows.first.wait_for(state="visible", timeout=PANEL_TIMEOUT // 2)
+                    except Exception:
+                        pass
                     nb_rows = rows.count()
                     colonnes = [
                         "Circuit",
