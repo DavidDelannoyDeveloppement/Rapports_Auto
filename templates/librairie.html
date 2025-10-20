@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Librairie PDF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+</head>
+<body>
+
+<h1>{{ 'Librairie complète (Admin)' if mode == 'admin' else 'Librairie PDF - Accès client' }}</h1>
+
+<div class="librairie">
+  {% for client, contrats in data.items() %}
+    <details class="client-block">
+      <summary><strong>📁 {{ client }}</strong></summary>
+
+      {% for contrat, mois_dict in contrats.items() %}
+        <details class="contrat-block">
+          <summary>📄 {{ contrat }}</summary>
+
+          {% for mois, fichiers in mois_dict.items() %}
+            <div class="mois-block">
+              <strong>{{ mois }}</strong> :
+              {% for fichier in fichiers %}
+                <a href="/{{ fichier }}" target="_blank">📄 {{ fichier.split('/')[-1] }}</a>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+        </details>
+      {% endfor %}
+
+    </details>
+  {% endfor %}
+</div>
+
+</body>
+</html>

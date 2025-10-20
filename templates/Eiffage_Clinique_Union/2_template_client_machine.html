@@ -1,0 +1,155 @@
+
+    <main class="container_client_machine">
+
+        <!-- ##################################################### -->
+        <!-- #######     PAGE ANALYSE CPE MENSUEL Gaz     ######## -->
+        <!-- ##################################################### -->
+        <div class="client_machine_page">
+            <div class="titre">
+                <h1>Résultat CPE Mensuel<br>Gaz</h1>
+            </div>
+
+            <div class="chiffres-cles">
+                <h3 class="chiffres">CHIFFRES</h3>
+                <h3 class="cles">CLÉS</h3>
+                <h2 class="pourcentage">{{valeurs("performance_contrat_percent_gaz_val") | virgule1 }} %</h2>
+                
+                <div class="support_engagement">
+                    <p class="eco_surconso">{{valeurs("eco_surconso") }} pour un engagement <br>contractuel de</p>
+                    <!-- <h2 class="pourcentage-contrat" style="color: #00a250;">{{valeurs("engagement_contract_gaz_val") }} %</h2> -->
+                    <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_gaz_val }} %</h2>
+                </div>
+            </div>
+            
+            <div class="ajustement"></div>
+
+            <div class="support-conso">
+                <div class="support-conso_colonne-gauche">
+                    <p>Consommation Prédite sans AEE de</p>
+                    <p>Consommation Réelle de</p>
+                    <hr class="hr-conso">
+                    <p>Soit {{ valeurs("gain_perte_gaz") }} de</p>
+                </div>
+                
+                <div class="support-conso_colonne-droite">
+                    <p>{{ valeurs("modele_predictif_gaz_val") | virgule1 }} <span class="unite">{{valeurs("modele_predictif_gaz_unit")}}</span></p>
+                    <p>{{ valeurs("consommation_reelle_gaz_val") | virgule1 }} <span class="unite">{{valeurs("consommation_reelle_gaz_unit")}}</span></p>
+                    <hr class="hr-resultat">
+                    <p>{{ valeurs("performance_contrat_kwh_gaz") | virgule1 }} <span class="unite">MWh</span></p>
+                </div>
+            </div>
+                     
+            <div class="ajustement"></div>
+            
+            <div class="support-graphique">
+                <h2>Superposition des consommations énergétiques de {{date_debut_cpe_annuel}} à {{ periode_client }}</h2>
+                <img class="graphic_image" src="{{ superposition_predictif_reelle_eiffage }}" alt="superposition_predictif_reelle-picture">
+            </div>
+
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ nom_affiche_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+
+        <!-- ################################################## -->
+        <!-- #######     PAGE ANALYSE CPE ANNEE Gaz     ####### -->
+        <!-- ################################################## -->
+        <div class="client_machine_page">
+            <div class="titre">
+                <h1>Résultat CPE Annuel<br>Gaz</h1>
+            </div>
+
+            <div class="chiffres-cles">
+                <h3 class="chiffres">CHIFFRES</h3>
+                <h3 class="cles">CLÉS</h3>
+                <h2 class="pourcentage">{{ valeurs("performance_contrat_percent_gaz_year_val")| virgule1  }} %</h2>
+                
+                <div class="support_engagement">
+                    <p class="eco_surconso">{{ valeurs("eco_surconso_year") }} pour un engagement <br>contractuel de</p>
+                    <!-- <h2 class="pourcentage-contrat" style="color: #00a250;">{{ valeurs("engagement_contract_gaz_year_val") }} %</h2> -->
+                    <h2 class="pourcentage-contrat" style="color: {{engagement_color}}">{{ engagement_contract_gaz_year_val }} %</h2>
+                </div>
+            </div>    
+
+            <div class="ajustement"></div>
+
+
+            <div class="support-conso">
+                <div class="support-conso_colonne-gauche">
+                    <p>Consommation Prédite sans AEE de</p>
+                    <p>Consommation Réelle de</p>
+                    <hr class="hr-conso">
+                    <p>Soit {{ valeurs("gain_perte_gaz_year") }} de</p>
+                </div>
+                
+                <div class="support-conso_colonne-droite">
+                    <p>{{ valeurs("modele_predictif_gaz_year_val")| virgule1  }} <span class="unite">{{valeurs("modele_predictif_gaz_year_unit")}}</span></p>
+                    <p>{{ valeurs("consommation_reelle_gaz_year_val")| virgule1  }} <span class="unite">{{valeurs("consommation_reelle_gaz_year_unit")}}</span></p>
+                    <hr class="hr-resultat">
+                    <p>{{ valeurs("performance_contrat_kwh_gaz_year")| virgule1  }} <span class="unite">MWh</span></p>
+                </div>
+            </div>
+
+
+            <div class="ajustement"></div>
+
+
+            <div class="support-graphique">
+                <h2>Superposition des consommations Gaz et Électrique PAC de {{date_debut_cpe_annuel}} à {{ periode_client }}</h2>
+                <img class="graphic_image" src="{{ superposition_predictif_reelle_2_eiffage }}" alt="superposition_predictif_reelle-picture">
+            </div>
+
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ nom_affiche_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+            <!-- <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> Mars 2024 - {{ periode_client }}</p> -->
+        </div>       
+
+
+        <!-- ###################################### -->
+        <!-- ####      PAGE 1 PERFORMANCES      ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="performances_client_machine_page_1">
+            <div class="titre">
+                <h1>Performances</h1>
+            </div>
+            <div class="support-graphique">
+                <h2>Puissance Thermique</h2>
+                <img src="{{ puissance_thermique }}" alt="puissance_thermique_picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Capacité PAC</h2>
+                <img src="{{ capacite_pac }}" alt="capacite_pac_picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Démarrages Journaliers</h2>
+                <img src="{{ demarrages_journaliers }}" alt="demarrages_journaliers_picture">
+            </div>
+            <div class="support-graphique">
+                <h2>COP PAC</h2>
+                <img src="{{ cop_pac }}" alt="cop_pac_picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ name_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>  
+        </div>
+
+        <!-- ###################################### -->
+        <!-- ####      PAGE 2 PERFORMANCES      ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="performances_client_machine_page_2">
+            <div class="support-graphique">
+                <h2>Températures PAC</h2>
+                <img src="{{ temperatures_pac }}" alt="temperatures_pac-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Capacité Groupe Froid 1</h2>
+                <img src="{{ capacite_gf1 }}" alt="capacite_gf1-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Capacité Groupe Froid 2</h2>
+                <img src="{{ capacite_gf2 }}" alt="capacite_gf2-picture">
+            </div>          
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{ nom_affiche_client }} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{ periode_client }}</p>
+        </div>
+
+    </main>

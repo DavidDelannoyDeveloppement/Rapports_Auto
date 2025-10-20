@@ -190,12 +190,29 @@
                 <h1>Analyse<br>Opérationnelle</h1>
             </div>
             <div class="support-graphique">
-                <h2>Températures process</h2>
+                <h2>Températures process - Centrale Froid 1</h2>
                 <img  src="{{temperatures_process}}" alt="temperatures_process-picture">
             </div>
             <div class="support-graphique">
-                <h2>Températures optimisation</h2>
+                <h2>Températures process - Centrale Froid 2</h2>
+                <img  src="{{temperatures_process_2}}" alt="temperatures_process-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>        
+        </div>
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 2 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_2">
+            <div class="support-graphique">
+                <h2>Températures optimisation - Centrale Froid 1</h2>
                 <img src="{{temperatures_opt}}" alt="temperatures_opt-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Températures optimisation - Centrale Froid 2</h2>
+                <img src="{{temperatures_opt_2}}" alt="temperatures_opt-picture">
             </div>
             <hr class="bottom_hr_bleu">
             <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>        
@@ -204,23 +221,43 @@
 
 
         <!-- ###################################### -->
-        <!-- #### PAGE 2 ANALYSE OPERATIONNELLE ###-->
+        <!-- #### PAGE 3 ANALYSE OPERATIONNELLE ###-->
         <!-- ###################################### -->
-        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_2">
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_3">
             <div class="support-graphique">
-                <h2>Mode de fonctionnement</h2>
+                <h2>Mode de fonctionnement - Centrale Froid 1</h2>
                 <img src="{{mode_fonctionnement}}" alt="mode_fonctionnement-picture">
             </div>
             <div class="support-graphique">
-                <h2>Taux de compression</h2>
+                <h2>Mode de fonctionnement - Centrale Froid 2</h2>
+                <img src="{{mode_fonctionnement_2}}" alt="mode_fonctionnement-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Taux de compression - Centrale Froid 1</h2>
                 <img src="{{taux_compression}}" alt="taux_de_compression-picture">
             </div>
             <div class="support-graphique">
-                <h2>Démarrage et temps de fonctionnement par compresseur</h2>
+                <h2>Taux de compression - Centrale Froid 2</h2>
+                <img src="{{taux_compression_2}}" alt="taux_de_compression-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>
+        </div>
+
+
+
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 4 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_4">
+            <h2>Démarrage et temps de fonctionnement par compresseur - Centrales Froid 1 et 2</h2>
+            <div class="support-graphique">
                 {% for slug, data in valeurs_multi.items() %}
                 {% for key, panel in data.valeurs.items() %}
-                    {% if key.endswith("_table_panel") and panel %}
-                    <table class="demarrage_temps_circuit_table">
+                {% if key.endswith("_table_panel") and panel %}
+                <table class="demarrage_temps_circuit_table">
                         <thead>
                         <tr>
                             <th>Compresseur</th>
@@ -252,15 +289,28 @@
                     {% endif %}
                 {% endfor %}
                 {% endfor %}
-            </div>        
-            
+            </div>  
             <div class="support-graphique">
-                <h2>Delta températures</h2>
+                <h2>Delta températures - Centrale Froid 1</h2>
                 <img src="{{delta_temperatures}}" alt="taux_de_compression-picture">
-            </div>       
+            </div>             
             <hr class="bottom_hr_bleu">
             <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>
         </div>
+
+
+
+        <!-- ###################################### -->
+        <!-- #### PAGE 4 ANALYSE OPERATIONNELLE ###-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="analyse_operationnelle_client_machine_page_4"> 
+            <div class="support-graphique">
+                <h2>Delta températures - Centrale Froid 2</h2>
+                <img src="{{delta_temperatures_2}}" alt="taux_de_compression-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>
+        </div>   
 
 
 
@@ -272,20 +322,46 @@
                 <h1>Performances</h1>
             </div>
             <div class="support-graphique">
-                <h2>COP</h2>
+                <h2>COP - Centrale Froid 1</h2>
                 <img src="{{COP}}" alt="COP-picture">
             </div>
             <div class="support-graphique">
-                <h2 >EER</h2>
+                <h2>COP - Centrale Froid 2</h2>
+                <img src="{{COP_2}}" alt="COP-picture">
+            </div>
+            <div class="support-graphique">
+                <h2 >EER - Centrale Froid 1</h2>
                 <img src="{{EER}}" alt="EER-picture">
             </div>
             <div class="support-graphique">
-                <h2>Taux de récupération de chaleur</h2>
+                <h2 >EER - Centrale Froid 2</h2>
+                <img src="{{EER_2}}" alt="EER-picture">
+            </div>
+            <hr class="bottom_hr_bleu">
+            <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>
+        </div>
+
+
+
+        <!-- ###################################### -->
+        <!-- ######### PAGE 2 PERFORMANCES ########-->
+        <!-- ###################################### -->
+        <div class="client_machine_page" id="performances_client_machine_page_2">
+            <div class="support-graphique">
+                <h2>Taux de récupération de chaleur - Centrale Froid 1</h2>
                 <img src="{{taux_recup_chaleur}}" alt="taux_recup_chaleur-picture">
             </div>
             <div class="support-graphique">
-                <h2>Puissance de récupération de chaleur et puissance condenseur</h2>
+                <h2>Taux de récupération de chaleur - Centrale Froid 2</h2>
+                <img src="{{taux_recup_chaleur_2}}" alt="taux_recup_chaleur-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Puissance de récupération de chaleur et puissance condenseur - Centrale Froid 1</h2>
                 <img src="{{puissances_recup_chaleur}}" alt="puissances_recup_chaleur-picture">
+            </div>
+            <div class="support-graphique">
+                <h2>Puissance de récupération de chaleur et puissance condenseur - Centrale Froid 2</h2>
+                <img src="{{puissances_recup_chaleur_2}}" alt="puissances_recup_chaleur-picture">
             </div>
             <hr class="bottom_hr_bleu">
             <p class="bas_page">{{name_client}} <b>|</b> Rapport de Performance Énergétique <b>|</b> {{periode_client}}</p>
