@@ -19,6 +19,7 @@ image_aliases = {
     "Quercy_Guilmot_Gaudais": "Quercy Guilmot Gaudais",
     "Leclerc_NLM": "Leclerc Nœux-les-Mines",
     "Leclerc_Vouziers": "Leclerc Vouziers",
+    "Eiffage_Clinique_Union":"Clinique de l'Union"
 }
 
 # Alias par type de dashboard (base, pour tous les contrats)
@@ -130,13 +131,9 @@ alias_groups = {
     }
 }
 
-# --- Overrides spécifiques à Leclerc_Vouziers ---
-# Hypothèse courante quand le dashboard double les graphes :
-#   C1 puis C2, dans l’ordre : (1,2), (3,4), (5,6), (7,8), ...
-# Adapte ici si besoin selon meta["captured_graphs"].
+
 leclerc_vouziers_overrides = {
     "analyse": {
-        # On RE-map les clés "C1" et on ajoute les paires "*_2" pour "C2"
         "temperatures_process": "graph_1.png",
         "temperatures_process_2": "graph_2.png",
         "temperatures_opt": "graph_3.png",
@@ -147,7 +144,6 @@ leclerc_vouziers_overrides = {
         "taux_compression_2": "graph_8.png",
         "delta_temperatures": "graph_11.png",
         "delta_temperatures_2": "graph_12.png",
-        # Si tu as d’autres widgets analytiques en double, ajoute-les ici.
     },
     "performances": {
         "COP": "graph_1.png",
@@ -161,19 +157,54 @@ leclerc_vouziers_overrides = {
     }
 }
 
+eiffage_clinique_union_overrides = {
+    "mensuel": {
+        "valeurs": {
+        "1_Consommation_de_Gaz":"consommation_reelle_gaz",
+        "2_Prédiction_de_Gaz":"modele_predictif_gaz",
+        "3_Economie_de_Gaz":"performance_contrat_percent_gaz",
+        "4_Engagement_Contractuel_Gaz":"engagement_contract_gaz"
+        },
+        "images": {
+            "superposition_predictif_reelle_eiffage":"graph_5.png"
+        }
+    },
+    "annuel": {
+        "valeurs": {
+        "1_Consommation_de_Gaz":"consommation_reelle_gaz_year",
+        "2_Prédiction_de_Gaz":"modele_predictif_gaz_year",
+        "3_Economie_de_Gaz":"performance_contrat_percent_gaz_year",
+        "4_Engagement_Contractuel_Gaz":"engagement_contract_gaz_year"
+        },
+        "images": {
+            "superposition_predictif_reelle_2_eiffage":"graph_6.png"
+        }
+    },
+    "analyse": {},
+    "performances": {
+        "images": {
+            "puissance_thermique":"graph_1.png",
+            "capacite_pac":"graph_2.png",
+            "demarrages_journaliers":"graph_3.png",
+            "cop_pac":"graph_4.png",
+            "temperatures_pac":"graph_5.png",
+            "capacite_gf1":"graph_6.png",
+            "capacite_gf2":"graph_7.png",
+        }
+    }
+}
+
 def _is_vouziers_context(dashboard_name: str) -> bool:
-    # Active l’override si :
-    # - le nom du dashboard contient "vouziers"
-    # - OU la variable d’environnement CURRENT_CONTRACT vaut Leclerc_Vouziers
     name = (dashboard_name or "").lower()
     env_flag = os.getenv("CURRENT_CONTRACT", "").strip().lower()
     return ("vouziers" in name) or (env_flag == "leclerc_vouziers")
 
+def _is_eiffage_union_context(dashboard_name: str) -> bool:
+    name = (dashboard_name or "").lower().replace(" ", "_")
+    env_flag = os.getenv("CURRENT_CONTRACT", "").strip().lower()
+    return ("eiffage" in name and ("union" in name or "clinique" in name)) or (env_flag == "eiffage_clinique_union")
+
 def resolve_alias_map(dashboard_name: str) -> dict:
-    """
-    Retourne la map alias (valeurs/images) en fonction du nom du dashboard.
-    Applique automatiquement l'override Leclerc_Vouziers si détecté.
-    """
     name = (dashboard_name or "").lower()
     if "analyse" in name or "operationnelle" in name:
         base = copy.deepcopy(alias_groups["analyse"])
@@ -188,11 +219,19 @@ def resolve_alias_map(dashboard_name: str) -> dict:
         base = copy.deepcopy(alias_groups["mensuel"])
         section = "mensuel"
 
-    # Appliquer l’override spécifique Leclerc_Vouziers uniquement sur les sections concernées
     if section in ("analyse", "performances") and _is_vouziers_context(dashboard_name):
         override = leclerc_vouziers_overrides.get(section, {})
-        # fusion dans base["images"] sans toucher aux autres contrats
         base.setdefault("images", {})
         base["images"].update(override)
 
+    if _is_eiffage_union_context(dashboard_name):
+        override = eiffage_clinique_union_overrides.get(section, {})
+        if "images" in override:
+            base.setdefault("images", {})
+            base["images"].update(override["images"])
+        if "valeurs" in override:
+            base.setdefault("valeurs", {})
+            base["valeurs"].update(override["valeurs"])
+
     return base
+
