@@ -19,7 +19,9 @@ image_aliases = {
     "Quercy_Guilmot_Gaudais": "Quercy Guilmot Gaudais",
     "Leclerc_NLM": "Leclerc Nœux-les-Mines",
     "Leclerc_Vouziers": "Leclerc Vouziers",
-    "Eiffage_Clinique_Union":"Clinique de l'Union"
+    "Eiffage_Clinique_Union":"Clinique de l'Union",
+    "Super_U_Frignicourt":"Super U Frignicourt"
+
 }
 
 # Alias par type de dashboard (base, pour tous les contrats)
@@ -32,6 +34,7 @@ alias_groups = {
             "8_Conso_Élec": "consommation_reelle_elec",
             "2_Conso_Élec": "consommation_reelle_elec",
             "8_Conso_Gaz":"consommation_reelle_gaz",
+            "2_Conso_Gaz":"consommation_reelle_gaz",
             "14_Conso_Gaz":"consommation_reelle_gaz",
             # Conso Prédite :
             "3_Conso_Prédite_Elec_+_Gaz": "modele_predictif_combine",
@@ -39,6 +42,7 @@ alias_groups = {
             "3_Conso_Prédite_Élec": "modele_predictif_elec",
             "9_Conso_Prédite_Élec": "modele_predictif_elec",
             "9_Conso_Prédite_Gaz":"modele_predictif_gaz",
+            "3_Conso_Prédite_Gaz":"modele_predictif_gaz",
             "15_Conso_Prédite_Gaz":"modele_predictif_gaz",
             # Perf ou Éco :
             "4_Eco_Elec_+_Gaz": "performance_contrat_percent_combine",
@@ -47,16 +51,20 @@ alias_groups = {
             "10_Eco_Elec": "performance_contrat_percent_elec",
             "16_Eco_Gaz":"performance_contrat_percent_gaz",
             "10_Eco_Gaz":"performance_contrat_percent_gaz",
+            "4_Eco_Gaz":"performance_contrat_percent_gaz",
             # Engagement :
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec",
             "5_Engagement_Contractuel_Élec": "engagement_contract_elec",
             "5_Engagement_Contractuel_Élec_+_Gaz":"engagement_contract_combine",
-            "11_Engagement_Contractuel_Gaz":"engagement_contract_gaz"
+            "11_Engagement_Contractuel_Gaz":"engagement_contract_gaz",
+            "5_Engagement_Contractuel_Gaz":"engagement_contract_gaz"
+
         },
         "images": {
             "superposition_predictif_reelle_alvend": "graph_5.png",
             "superposition_predictif_reelle_itm": "graph_6.png",
             "superposition_predictif_reelle_quercy": "graph_6.png",
+            "superposition_predictif_reelle_super_u_frignicourt": "graph_6.png",
             "superposition_predictif_reelle_elec_itm": "graph_12.png",
             "superposition_predictif_reelle_elec_separe_itm": "graph_6.png",
             "superposition_predictif_reelle_gaz_separe_itm": "graph_12.png",
@@ -72,6 +80,7 @@ alias_groups = {
             "8_Conso_Gaz":"consommation_reelle_gaz_year",
             "8_Conso_Élec": "consommation_reelle_elec_year",
             "14_Conso_Gaz":"consommation_reelle_gaz_year",
+            "2_Conso_Gaz":"consommation_reelle_gaz_year",
             # Conso Prédite :
             "3_Conso_Prédite_Elec_+_Gaz": "modele_predictif_combine_year",
             "2_Prédiction_d'électricité": "modele_predictif_elec_year",
@@ -79,6 +88,7 @@ alias_groups = {
             "9_Conso_Prédite_Élec": "modele_predictif_elec_year",
             "9_Conso_Prédite_Gaz":"modele_predictif_gaz_year",
             "15_Conso_Prédite_Gaz":"modele_predictif_gaz_year",
+            "3_Conso_Prédite_Gaz":"modele_predictif_gaz_year",
             # Perf ou Éco :
             "4_Eco_Elec_+_Gaz": "performance_contrat_percent_combine_year",
             "3_Economie_d'électricité": "performance_contrat_percent_elec_year",
@@ -86,16 +96,19 @@ alias_groups = {
             "10_Eco_Gaz":"performance_contrat_percent_gaz_year",
             "10_Eco_Elec": "performance_contrat_percent_elec_year",
             "16_Eco_Gaz":"performance_contrat_percent_gaz_year",
+            "4_Eco_Gaz":"performance_contrat_percent_gaz_year",
             # Engagement :
             "4_Engagement_Contractuel_Élec": "engagement_contract_elec_year",
             "5_Engagement_Contractuel_Élec": "engagement_contract_elec_year",
             "11_Engagement_Contractuel_Gaz":"engagement_contract_gaz_year",
+            "5_Engagement_Contractuel_Gaz":"engagement_contract_gaz_year",
             "5_Engagement_Contractuel_Élec_+_Gaz":"engagement_contract_combine_year",
         },
         "images": {
             "superposition_predictif_reelle_year_alvend": "graph_5.png",
             "superposition_predictif_reelle_year_itm": "graph_6.png",
             "superposition_predictif_reelle_year_quercy": "graph_6.png",
+            "superposition_predictif_reelle_year_super_u_frignicourt": "graph_6.png",
             "superposition_predictif_reelle_elec_year_itm": "graph_12.png",
             "superposition_predictif_reelle_elec_separe_year_itm": "graph_6.png",
             "superposition_predictif_reelle_gaz_separe_year_itm": "graph_12.png",

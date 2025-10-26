@@ -63,10 +63,10 @@ def performance_kwh_elec_year(valeurs):
 def performance_kwh_gaz(valeurs):
     try:
         consommation = chercher_valeur(valeurs, [
-            "1_Consommation_de_gaz", "14_Conso_Gaz", "8_Conso_Gaz","1_Consommation_de_Gaz"
+            "1_Consommation_de_gaz", "14_Conso_Gaz", "8_Conso_Gaz","1_Consommation_de_Gaz", "2_Conso_Gaz"
         ])
         prediction = chercher_valeur(valeurs, [
-            "2_Prédiction_de_gaz","15_Conso_Prédite_Gaz", "9_Conso_Prédite_Gaz","2_Prédiction_de_Gaz"
+            "2_Prédiction_de_gaz","15_Conso_Prédite_Gaz", "9_Conso_Prédite_Gaz","2_Prédiction_de_Gaz","3_Conso_Prédite_Gaz"
         ])
         ecart_kwh = abs(prediction - consommation)
         ecart_mwh = ecart_kwh / 1000  # Conversion finale
@@ -116,10 +116,10 @@ def gain_perte_elec_year(valeurs):
 def gain_perte_gaz(valeurs):
     try:
         consommation = chercher_valeur(valeurs, [
-            "1_Consommation_de_gaz", "14_Conso_Gaz", "8_Conso_Gaz", "1_Consommation_de_Gaz"
+            "1_Consommation_de_gaz", "14_Conso_Gaz", "8_Conso_Gaz", "1_Consommation_de_Gaz", "2_Conso_Gaz"
         ])
         prediction = chercher_valeur(valeurs, [
-            "2_Prédiction_de_gaz", "15_Conso_Prédite_Gaz", "9_Conso_Prédite_Gaz", "2_Prédiction_de_Gaz"
+            "2_Prédiction_de_gaz", "15_Conso_Prédite_Gaz", "9_Conso_Prédite_Gaz", "2_Prédiction_de_Gaz", "3_Conso_Prédite_Gaz"
         ])
         return "un Gain" if prediction - consommation >= 0 else "une Perte"
     except Exception:
@@ -144,12 +144,12 @@ def engagement_color(valeurs):
 
         perf = to_float(chercher_valeur(valeurs, [
             "3_Economie_d'électricité", "3_Economie_de_gaz", "3_Economie Elec + Gaz",
-            "4_Eco_Elec_+_Gaz", "4_Eco_Elec", "10_Eco_Gaz", "3_Economie_de_Gaz"
+            "4_Eco_Elec_+_Gaz", "4_Eco_Elec", "10_Eco_Gaz", "3_Economie_de_Gaz", "4_Eco_Gaz"
         ]))
         engag = to_float(chercher_valeur(valeurs, [
             "4_Engagement_Contractuel_Élec", "4_Engagement_Contractuel_Gaz",
             "4_Engagement_Contractuel_Elec+Gaz", "5_Engagement_Contractuel_Élec_+_Gaz",
-            "5_Engagement_Contractuel_Élec", "11_Engagement_Contractuel_Gaz"
+            "5_Engagement_Contractuel_Élec", "11_Engagement_Contractuel_Gaz", "5_Engagement_Contractuel_Gaz"
         ]))
 
         # logique couleur : vert si perf >= engag et perf positif, sinon rouge
@@ -170,7 +170,7 @@ def engagement_color_year(valeurs):
 def eco_surconso(valeurs):
     try:
         perf = chercher_valeur(valeurs, [
-            "3_Economie_d'électricité", "3_Economie_de_gaz", "3_Economie Elec + Gaz","4_Eco_Elec_+_Gaz", "4_Eco_Elec", "10_Eco_Gaz", "3_Economie_de_Gaz"
+            "3_Economie_d'électricité", "3_Economie_de_gaz", "3_Economie Elec + Gaz","4_Eco_Elec_+_Gaz", "4_Eco_Elec", "10_Eco_Gaz", "3_Economie_de_Gaz", "4_Eco_Gaz"
         ])
         return "d'Économie" if perf >= 0 else "de Surconsommation"
     except Exception:
